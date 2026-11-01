@@ -58,7 +58,7 @@ ORIGEM = RAIZ / 'musicas' / 'rock e metal (unsorted)'
 DESTINO = RAIZ / 'musicas' / 'bandas'
 CACHE = Path(__file__).resolve().parent / 'popularidade.json'
 
-UA = 'flyback-midi/1.0 (https://github.com/Johaan01/flyback-midi) python-urllib'
+UA = 'flyback-midi/1.0 (https://github.com/joaohauch/flyback-midi) python-urllib'
 MB = 'https://musicbrainz.org/ws/2'
 LB = 'https://api.listenbrainz.org/1'
 WP = 'https://en.wikipedia.org/w/api.php'

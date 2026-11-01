@@ -40,7 +40,7 @@ DESTINO = RAIZ / 'musicas' / 'classicos'
 CREDITOS = DESTINO / 'creditos.json'
 SITE = 'https://www.mutopiaproject.org/'
 ARVORE = 'https://api.github.com/repos/MutopiaProject/MutopiaProject/git/trees/master?recursive=1'
-AGENTE = 'flyback-midi-acervo/1.0 (+https://github.com/Johaan01/flyback-midi)'
+AGENTE = 'flyback-midi-acervo/1.0 (+https://github.com/joaohauch/flyback-midi)'
 MP = '{http://www.mutopiaproject.org/piece-data/0.1/}'
 PAUSA = 0.25          # segundos entre pedidos de cada conexão
 CONEXOES = 4

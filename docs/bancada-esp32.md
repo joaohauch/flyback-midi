@@ -122,12 +122,12 @@ protocolo funcionam digitadas: `R`, `N 0 0 440.00`, `F 0 2000`, `X`, `?`.
 
 ## 7. Pelo site
 
-1. Chrome ou Edge, em https://johaan01.github.io/flyback-midi/
+1. Chrome ou Edge, em https://joaohauch.github.io/flyback-midi/
 2. Painel de saída: **Flybacks 2**, **Placa ESP32**, pinos 18 e 19, 115200, **Conectar ESP32**.
 3. "testar" em cada canal: um lá de 0,6 s.
 4. Abrir uma música e tocar. Com 2 flybacks a serial manda só os canais 1 e 2.
 5. Desconectar no player (só uma página usa a porta por vez) e abrir o **gerador de tom**
-   (https://johaan01.github.io/flyback-midi/tom.html; Ctrl+F5 se acabou de sair versão nova). Em
+   (https://joaohauch.github.io/flyback-midi/tom.html; Ctrl+F5 se acabou de sair versão nova). Em
    "Saída", **ESP32 pela serial**, **Placa ESP32** (a mesma do player) → **Conectar ESP32**.
 6. Pelo ESP o gerador tem um canal só, o canal 1 do ESP, no **Pino do ESP** escolhido junto da
    frequência (GPIO 4). ▶: tom contínuo no pino, na frequência do slider; o osciloscópio à direita

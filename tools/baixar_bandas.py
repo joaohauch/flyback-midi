@@ -61,7 +61,7 @@ from organizar_bandas import titulo_bonito, normalizar_banda   # noqa: E402
 
 RAIZ = Path(__file__).resolve().parent.parent
 DESTINO = RAIZ / 'musicas' / 'rock e metal (unsorted)'
-UA = 'flyback-midi/1.0 (https://github.com/Johaan01/flyback-midi) python-urllib'
+UA = 'flyback-midi/1.0 (https://github.com/joaohauch/flyback-midi) python-urllib'
 
 # Termos usados quando não se passa --busca. O midiworld só acha por palavra solta e casa de
 # forma bem literal, então vale listar a banda do jeito que ela aparece nos títulos de lá.

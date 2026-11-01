@@ -204,7 +204,7 @@ def para_o_mirelo(saida, estado):
     arq.write_text('\n'.join(linhas) + '\n', encoding='utf-8')
 
 
-UA = 'flyback-midi/1.0 (https://github.com/Johaan01/flyback-midi)'
+UA = 'flyback-midi/1.0 (https://github.com/joaohauch/flyback-midi)'
 # gêneros do MusicBrainz agrupados em poucos nomes: o filtro do site tem de ser curto
 GENEROS = [('metal', 'Metal'), ('punk', 'Punk'), ('rock', 'Rock'), ('sertanejo', 'Sertanejo'),
            ('gaúcha', 'Gaúcha'), ('gaucha', 'Gaúcha'), ('nativis', 'Gaúcha'), ('samba', 'Samba'),
