@@ -2,7 +2,7 @@
 
 **Projeto:** FBMD / LMD — Lightning Modulated Driver
 **Revisões cobertas:** V3 → V3.5 → V3.6 → V4 (em definição)
-**Data do registro:** setembro de 2026; bancada de 21/out/2026 e simulações da V3.6 na seção 9
+**Data do registro:** setembro de 2026; bancada de 21/out/2026 e simulações da V3.6 na seção 9; PowerBoard V2.2, a placa de potência para fresar, na seção 10 (23/nov/2026)
 
 ---
 
@@ -157,6 +157,8 @@ Com os 236 nC do IRFP260N, a perda de cruzamento escala com esse tempo. Some-se 
 **Custo:** propagação piora de ~50 ns para ~350 ns, consumindo parte do orçamento do vale. Atraso fixo é deslocamento de fase, não perda.
 
 **Efeito colateral positivo:** desligamento três vezes mais rápido permite reduzir a capacitância de snubber no dreno, o que reduz o `½CV²` do ligamento. As duas mudanças andam juntas.
+
+**Atualização (23/nov/2026):** a placa de potência que vai ser fabricada, a PowerBoard V2.2 (seção 10), fica com o totem pole da placa em uso: é mais simples e já funciona. O FOD3184 e o 7815 estão no desenho da PowerBoard V3 do EasyEDA.
 
 ### 3.8 Alimentação do FOD3184
 
@@ -525,6 +527,8 @@ Leituras que **não** valem:
 
 Na placa final: 3 × 100 nF MKP e uma quarta posição vazia (C11), para os 400 nF se algum flyback encostar no limite antes do pulso desejado.
 
+**Atualização (23/nov/2026):** a PowerBoard V2.2 ficou sem a quarta posição (seção 10.2).
+
 **Para mais arco, alongar o pulso no vale; não subir a frequência** (`sim_mais_potencia.py`, IRFP264N, 300 nF).
 
 Subir a frequência com o pulso fixo em 15,68 µs:
@@ -587,3 +591,60 @@ A entrada da V3.6 é 6N136 + BC547 no RESET do U13, com lógica direta: GPIO alt
 3. **Período da oscilação com 300 nF e com 200 nF** (T₁ e T₂). L = (T₁² − T₂²) / (4π² × 100 nF), descontada a capacitância em paralelo com o banco. Perto de 3 µH, a oscilação rápida é a dispersão (9.3); perto de 8 a 12 µH, é o primário inteiro.
 4. **Escada de potência.** Alongar o pulso de 1 em 1 µs e reajustar o vale a cada passo; a frequência cai alguns kHz (de ~40 para ~37 kHz em 20 µs). Em cada passo, tocar 30 a 60 s, medir a temperatura do flyback e do MOSFET e olhar o fundo do mergulho na bobina.
 5. **Refazer espiras e potência com o L medido**, e pôr no modelo a capacitância do secundário se o teste 3 apontar para ela.
+
+---
+
+## 10. PowerBoard V2.2: a placa de potência para fresar (23/nov/2026)
+
+A placa de potência que vai ser feita em quatro unidades, numa fresadora CNC (isolação pelo FlatCAM). É a PowerBoard V2.1 do Altium (totem pole) com as decisões da seção 9.4, no desenho da PowerBoard V3 do EasyEDA: o mesmo tamanho, 85,2 × 39,5 mm, e as peças de potência nas mesmas posições.
+
+O projeto do KiCad 10 fica em `FlybachSchems/PowerBoard_V2.2/`, fora deste repositório, com uma subpasta por versão (10.2). Ele é gerado por `gerar_v22.py` e `pcb_v22.py`, com ERC e DRC sem erros. O README de lá traz a montagem, a lista de peças e o passo a passo do FlatCAM. O Gerber da V3 do EasyEDA está em `FlybachSchems/PowerBoardV3_EasyEDA/`.
+
+### 10.1 A placa
+
+| Bloco | Implementação |
+|---|---|
+| Face | Simples: cobre só embaixo. O que cruza por cima vai num fio rígido (JP1) |
+| Entrada | XT60 e banco de 4× 470 µF 35 V (1880 µF) |
+| Driver | Totem pole BC337/BC327, com os 12 V da placa de controle pelo P2 (12V, GND e SIN, na ordem do J3 do controle) |
+| Gate | 10 Ω em paralelo com o 1N4148 e 10 kΩ para o GND (seção 9.4) |
+| Potência | IRFP264N e MUR860 |
+| Dreno | 3× 100 nF MKP 400 V. Cada um tem dois furos para a perna do dreno, um para o lote de passo 10 mm e outro para o de 15 mm |
+| Primário | Borne de encaixe de 5,08 mm (2EDG) |
+| Fixação | 4 furos M3, para standoffs de nylon |
+
+### 10.2 Decisões
+
+**Totem pole, não FOD3184.** A V3 do EasyEDA tinha o driver isolado das seções 3.7 e 3.8. A V2.2 fica com o circuito da placa em uso, que é mais simples e já funciona. Saem o FOD3184, o 7815, os capacitores de 15 V e o jumper que levava os 24 V ao 7815.
+
+**Sem a quarta posição de MKP (C11).** Ela só cabia deslocando o estágio de potência 7,5 mm e espremendo o driver. E 400 nF empata com 300 nF (seção 9.4): o que o C11 faria, baixar o dreno de um flyback que encoste no limite, o PR5 também faz, encurtando o pulso.
+
+**Sem cerâmico no 24 V** (o C5 da V3.6). O 100 nF da V3 estava lá pela entrada do 7815; ao lado de 1880 µF, a ~40 kHz, não muda nada. As referências seguem as da V3.6, sem o C5 e o C11.
+
+**Um GND só.** Na V3.6, o retorno do MOSFET (HVGD) encontrava o GND num ponto só, no negativo do banco (NT1). Na V2.2 a rede é uma só, e o retorno do driver vai direto ao source: pelo fio JP1 na versão A, por trilha na B.
+
+**Folga de 1,5 mm entre +24V e GND,** por uma regra do `.kicad_dru`. Os dois correm lado a lado pela placa toda, e uma rebarba da fresa ou um respingo de solda curtaria a fonte. Os pads do XT60 são ovais, para dar 1,6 mm entre os pinos. O dreno também tem 1,5 mm de folga; o resto, 0,5 a 0,6 mm.
+
+**Sem texto no cobre.** Cada letra é tempo de fresa. A serigrafia vai numa folha impressa em cores, em escala 1:1, colada sobre a face de cima (`*_impressao_topo.pdf`, seis cópias numa A4).
+
+**XT60 com o pino 1 no GND,** que é o lado chanfrado, como na V3. Na V3.6, o J1.1 era o +24V.
+
+**Duas montagens do MOSFET:**
+
+| | A, principal (`A_mosfet_embaixo/`) | B, reserva (`B_mosfet_em_pe/`) |
+|---|---|---|
+| IRFP264N | Deitado embaixo da placa, com a aba no dissipador, que serve de base. A placa fica em standoffs de nylon de ~10 mm | Em pé na face de cima, com a aba para a borda de baixo |
+| Pinos, da esquerda para a direita | G-D-S | S-D-G |
+| O que o fio JP1 leva por cima do dreno | O retorno do driver até o source | O gate |
+
+Na A, o corpo deita para dentro da placa, com a face escrita virada para ela; deitado para fora, G e S trocariam. Nas duas, a aba é o dreno, que chega a ~211 V na bancada (9.2) e a ~230 V no ponto de trabalho de 20 µs (9.4). Por isso ela vai isolada do dissipador, com mica ou silicone e bucha no parafuso.
+
+### 10.3 Fabricação
+
+A fresa pede o contorno, a furação PTH e NPTH e o cobre. A pasta `fabricacao/` de cada versão tem só esses quatro arquivos, e o `<nome>_fresa.zip` ao lado dela tem os mesmos, para enviar.
+
+- **Cobre:** só o B.Cu, desenhado visto de cima, como todo Gerber. No FlatCAM, espelhe cobre, contorno e furos juntos.
+- **Furos:** 51, em seis brocas de 0,8 a 4,5 mm.
+- **Isolação:** nas folgas de 1,5 mm, poucas passadas deixam uma tira de cobre solta no meio. Use passadas suficientes, ou NCC.
+
+A versão A vai para a fresa primeiro; a B fica gerada, se precisar.
