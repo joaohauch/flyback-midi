@@ -1187,5 +1187,20 @@
   "aproveitamento": 50,
   "aproveitamento6": 74,
   "estilo": "Pop"
+ },
+ "Justice - Flower In A Hurricane.mid": {
+  "autor": "Justice",
+  "artista": "Justice",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "interpretação de Justice com Tame Impala, SZA e King Gizzard & the Lizard Wizard; \"Flower In A Hurricane\", da trilha de Grand Theft Auto VI",
+  "transcricao": "MuScriptor large (Kyutai/Mirelo) rodado localmente, transcrição automática do áudio, sem transcritor humano; instrumentos escolhidos à mão: voice, synth lead, synth pad, electric bass, drums",
+  "fonte": "https://www.youtube.com/watch?v=5dPwBWvmcbQ",
+  "vocal": "sim · faixa \"voice\"",
+  "aproveitamento": 45,
+  "aproveitamento6": 62,
+  "categorias": [
+   "jogos",
+   "pop"
+  ]
  }
 }
