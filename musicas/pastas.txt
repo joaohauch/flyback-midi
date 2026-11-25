@@ -1,5 +1,6 @@
 # Ordem das pastas no acervo do site. Pastas que não estiverem aqui vêm depois, em ordem alfabética.
 bandas
+temas
 classicos
 folk russo
 exemplos

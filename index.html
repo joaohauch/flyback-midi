@@ -31,7 +31,13 @@ a{color:var(--c2)}
 .mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
 
 /* ---------- moldura: barra, metade de cima, transporte, doca ---------- */
-.app{height:100vh;display:flex;flex-direction:column;gap:6px;padding:6px 8px 8px}
+/* Acervo na altura inteira, à esquerda; à direita, faixas e prévia lado a lado, o transporte e a
+   doca com os canais e a saída. Pedido do dono do projeto (nov/2026): a lista de músicas embaixo
+   mostrava poucas linhas, e a prévia não precisava de 3/4 da largura. Cada divisória (.vsplit,
+   .split) arrasta, anda com as setas e lembra o tamanho; duplo clique volta ao padrão. */
+.app{height:100vh;display:flex;padding:6px 8px 8px}
+.principal{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:6px}
+.app>.acervo{width:clamp(320px,24vw,520px);flex:none}
 .bar{display:flex;align-items:center;gap:14px;min-height:36px;flex:none;padding:0 2px}
 h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em;white-space:nowrap}
 .tabs{display:inline-flex;flex:none;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
@@ -44,8 +50,12 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em;white-space:now
 
 /* a doca de baixo precisa de altura estável para o acervo e o mixer caberem; a metade de cima
    fica com o que sobra, e a divisória ajusta */
-.topo{display:grid;grid-template-columns:minmax(380px,34%) minmax(0,1fr);gap:6px;height:clamp(200px,calc(100vh - 480px),70vh);min-height:150px;flex:none}
-.doca{flex:1;min-height:0;display:grid;grid-template-columns:minmax(320px,28%) minmax(0,1fr) minmax(290px,23%);gap:6px}
+.topo{display:flex;height:clamp(200px,calc(100vh - 480px),70vh);min-height:150px;flex:none}
+.topo>.faixas{width:50%;flex:none}
+.topo>.saidas{flex:1;min-width:0}
+.doca{flex:1;min-height:0;display:flex}
+.doca>.canais{flex:1;min-width:0}
+.doca>.saida{width:clamp(290px,26%,520px);flex:none}
 .pane{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid var(--rule);border-radius:3px;background:var(--field);overflow:hidden}
 .pane-h{display:flex;align-items:center;gap:10px;min-height:32px;padding:3px 10px;background:var(--chrome);border-bottom:1px solid var(--rule);flex:none}
 .pane-h h2{font-size:12.5px;font-weight:600;margin:0;white-space:nowrap}
@@ -109,6 +119,11 @@ h3{font-size:12.5px;font-weight:600;margin:16px 0 6px}
 .split{height:8px;margin:-5px 0 -3px;cursor:row-resize;position:relative;flex:none;z-index:2;touch-action:none}
 .split::after{content:"";position:absolute;left:50%;top:3px;width:56px;height:2px;margin-left:-28px;background:var(--rule);border-radius:1px}
 .split:hover::after,.split.drag::after,.split:focus-visible::after{background:var(--dim)}
+.vsplit{width:8px;flex:none;cursor:col-resize;position:relative;z-index:2;touch-action:none}
+.vsplit::after{content:"";position:absolute;top:50%;left:3px;width:2px;height:56px;margin-top:-28px;background:var(--rule);border-radius:1px}
+.vsplit:hover::after,.vsplit.drag::after,.vsplit:focus-visible::after{background:var(--dim)}
+body.arrastando{cursor:col-resize;user-select:none}
+body.arrastando.linha{cursor:row-resize}
 
 /* ---------- controles ---------- */
 button,.btn{font:inherit;font-size:12.5px;color:var(--ink);background:var(--chrome);border:1px solid var(--rule);border-radius:3px;cursor:pointer;padding:4px 10px}
@@ -225,8 +240,10 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
    computador, mas abrir num notebook pequeno ou no celular não pode quebrar. */
 @media (max-width:1099px),(max-height:599px){
   body{overflow:auto}
-  .app{height:auto;min-height:100vh}
-  .topo,.doca{display:flex;flex-direction:column;height:auto!important}
+  .app{height:auto;min-height:100vh;flex-direction:column;gap:6px}
+  .topo,.doca{display:flex;flex-direction:column;gap:6px;height:auto!important}
+  .app>.acervo,.topo>.faixas,.doca>.saida{width:auto!important}
+  .vsplit{display:none}
   .saidas{height:max(240px,45vh);flex:none}
   .faixas .pane-b{max-height:60vh}
   .acervo .pane-b{max-height:70vh}
@@ -245,6 +262,44 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
 <body>
 <div class="app">
 
+  <section class="pane acervo" aria-label="Acervo">
+    <div class="fixo">
+      <div class="lib-topo">
+        <div class="seg vistas" id="libA" role="group" aria-label="Acervo"></div>
+        <div class="menu">
+          <button id="libFiltros" aria-haspopup="true" aria-expanded="false">Filtros</button>
+          <div class="pop hide" id="libPop" role="group" aria-label="Filtros">
+            <label class="chk"><input type="checkbox" id="fVoz"> com voz</label>
+            <label class="chk" title="soam bem já com dois flybacks"><input type="checkbox" id="f2"> 2 canais</label>
+            <label class="chk" title="só soam bem com mais de dois flybacks, um instrumento por arco"><input type="checkbox" id="fMais"> + de 2 canais</label>
+            <label class="chk hide" id="fTopoRot" title="as 60 mais conhecidas das bandas"><input type="checkbox" id="fTopo"> mais ouvidas</label>
+            <button id="libRnd">sortear uma</button>
+          </div>
+        </div>
+        <button id="baixarMus" title="buscar no YouTube e transcrever na sua GPU ou no Mirelo">Baixar músicas…</button>
+      </div>
+      <div class="lib-linha hide" id="libTools">
+        <select id="libF" aria-label="Artista ou grupo"></select>
+        <select id="libG" aria-label="Gênero"></select>
+        <input type="search" id="libQ" placeholder="buscar título, artista, compositor" aria-label="Buscar no acervo" autocomplete="off">
+      </div>
+    </div>
+    <div class="pane-b">
+      <ul class="liblist" id="libList"></ul>
+      <p class="note-line" id="libMsg">carregando…</p>
+      <div class="lib-acoes">
+        <button id="abrir">Abrir arquivo…</button>
+        <button id="libAdd">Guardar MIDI neste navegador…</button>
+        <button id="libDel" class="hide">Esquecer os meus</button>
+        <button id="libOff" class="hide">Guardar para usar sem internet</button>
+        <a id="libUp" class="btn hide" target="_blank" rel="noopener">Enviar música para o acervo</a>
+      </div>
+      <p class="foot" id="foot"></p>
+    </div>
+  </section>
+  <div class="vsplit" id="splitAcervo" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Divisória entre o acervo e o resto. Arraste, ou use as setas. Duplo clique volta ao tamanho padrão."></div>
+
+  <div class="principal">
   <div class="topo" id="topo">
     <section class="pane faixas" aria-label="Faixas da música">
       <div class="fixo">
@@ -260,10 +315,11 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
       </div>
       <div class="pane-b">
         <div class="tracks" id="tracks" role="list"></div>
-        <p class="vazio" id="faixasVazio">Escolha uma música no acervo, aqui embaixo, ou arraste um arquivo MIDI ou Guitar Pro para esta janela. As faixas aparecem aqui, cada uma com o flyback para onde vai.</p>
+        <p class="vazio" id="faixasVazio">Escolha uma música no acervo, aqui ao lado, ou arraste um arquivo MIDI ou Guitar Pro para esta janela. As faixas aparecem aqui, cada uma com o flyback para onde vai.</p>
         <p class="credit hide" id="credito"></p>
       </div>
     </section>
+    <div class="vsplit" id="splitFaixas" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Divisória entre as faixas e as pistas dos flybacks. Arraste, ou use as setas. Duplo clique volta ao tamanho padrão."></div>
 
     <section class="pane saidas" aria-label="O que cada flyback está tocando">
       <div class="lanes" id="lanes"></div>
@@ -277,51 +333,16 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
     <span class="clock" id="clock">0:00 / 0:00</span>
     <canvas id="roll" role="slider" tabindex="0" aria-label="Linha do tempo de todas as saídas. Clique ou arraste para ir a um ponto da música." aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></canvas>
     <select id="zoom" aria-label="Janela de tempo das pistas" title="quanto tempo cada pista mostra">
-      <option value="5">5 s</option><option value="10" selected>10 s</option><option value="20">20 s</option><option value="40">40 s</option>
+      <option value="5" selected>5 s</option><option value="10">10 s</option><option value="20">20 s</option><option value="40">40 s</option>
     </select>
   </div>
   <div class="split" id="split" role="separator" aria-orientation="horizontal" aria-label="Divisória entre as faixas e os painéis de baixo. Arraste, ou use as setas. Duplo clique volta ao tamanho padrão." tabindex="0"></div>
 
   <div class="doca">
-    <section class="pane acervo" aria-label="Acervo">
-      <div class="fixo">
-        <div class="lib-topo">
-          <div class="seg vistas" id="libA" role="group" aria-label="Acervo"></div>
-          <div class="menu">
-            <button id="libFiltros" aria-haspopup="true" aria-expanded="false">Filtros</button>
-            <div class="pop hide" id="libPop" role="group" aria-label="Filtros">
-              <label class="chk"><input type="checkbox" id="fVoz"> com voz</label>
-              <label class="chk" title="soam bem já com dois flybacks"><input type="checkbox" id="f2"> 2 canais</label>
-              <label class="chk" title="só soam bem com mais de dois flybacks, um instrumento por arco"><input type="checkbox" id="fMais"> + de 2 canais</label>
-              <label class="chk hide" id="fTopoRot" title="as 60 mais conhecidas das bandas"><input type="checkbox" id="fTopo"> mais ouvidas</label>
-              <button id="libRnd">sortear uma</button>
-            </div>
-          </div>
-          <button id="baixarMus" title="buscar no YouTube e transcrever na sua GPU ou no Mirelo">Baixar músicas…</button>
-        </div>
-        <div class="lib-linha hide" id="libTools">
-          <select id="libF" aria-label="Artista ou grupo"></select>
-          <select id="libG" aria-label="Gênero"></select>
-          <input type="search" id="libQ" placeholder="buscar título, artista, compositor" aria-label="Buscar no acervo" autocomplete="off">
-        </div>
-      </div>
-      <div class="pane-b">
-        <ul class="liblist" id="libList"></ul>
-        <p class="note-line" id="libMsg">carregando…</p>
-        <div class="lib-acoes">
-          <button id="abrir">Abrir arquivo…</button>
-          <button id="libAdd">Guardar MIDI neste navegador…</button>
-          <button id="libDel" class="hide">Esquecer os meus</button>
-          <button id="libOff" class="hide">Guardar para usar sem internet</button>
-          <a id="libUp" class="btn hide" target="_blank" rel="noopener">Enviar música para o acervo</a>
-        </div>
-        <p class="foot" id="foot"></p>
-      </div>
-    </section>
-
     <section class="pane canais" aria-label="Canais: um módulo por flyback">
       <div class="pane-b"><div class="strips" id="strips"></div></div>
     </section>
+    <div class="vsplit" id="splitSaida" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Divisória entre os canais e a saída. Arraste, ou use as setas. Duplo clique volta ao tamanho padrão."></div>
 
     <section class="pane saida" aria-label="Saída para os flybacks">
       <div class="pane-b">
@@ -360,6 +381,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
         <p class="txt" id="cfgMsg">nenhuma música aberta</p>
       </div>
     </section>
+  </div>
   </div>
 </div>
 <dialog class="dlg" id="dlgBaixar" aria-labelledby="dlgTit">
@@ -489,7 +511,10 @@ function parseMidi(buf, porCanal = true){
           else if (type === 0x51 && l === 3) tempos.push({ tick, us: (v.getUint8(p) << 16) | (v.getUint8(p + 1) << 8) | v.getUint8(p + 2) });
           p += l;
         } else if (st === 0xf0 || st === 0xf7){
-          p += vlq();
+          /* o tamanho primeiro, e só depois o salto: `p += vlq()` lê o p de antes do vlq() avançar
+             sobre o próprio tamanho, cai um byte atrás e lê o F7 do fim como tempo — Livin' on a
+             Prayer, com um SysEx no começo da faixa das cordas, durava 45 min em vez de 4 */
+          const l = vlq(); p += l;
         } else if (st < 0xf0){
           running = st;
           const hi = st & 0xf0, c = st & 0x0f;
@@ -620,7 +645,7 @@ const ch = Array.from({ length: MAX }, () => ({
   mudo: false, solo: false, stat: 'sem faixa', lx: null, sx: null }));
 let tracks = [], assign = [], prio = [], actx = null, merger = null, current = null;
 let startedAt = 0, offset = 0, playing = false, duration = 0, scrubbing = false, scrubAt = 0, loop = false, idle = 2;
-let janela = [5, 10, 20, 40].includes(+store.get('janela')) ? +store.get('janela') : 10;
+let janela = [5, 10, 20, 40].includes(+store.get('janela')) ? +store.get('janela') : 5;   /* 5 s: a prévia tem metade da largura de antes */
 
 /* Pinos de saída livres em módulos comuns, sem os de boot (strapping), os da memória flash e
    PSRAM, os da USB nativa e os da UART0. O MCPWM chega a qualquer GPIO pela matriz, então a
@@ -705,13 +730,13 @@ function buildSegs(i){
   const pick = ch[i].ctl.pick === 'div' ? (esp.n === 2 ? (i ? 'hi' : 'lo') : PICK_PAPEL[i]) : ch[i].ctl.pick;
   const oct = ch[i].ctl.oct, grave = !dois() && ch[i].som === 'baixo';
   const ev = [];
-  sel.forEach(([t, p, k]) => notasPara(t, k, i).forEach(n => {
+  donoPorTrecho(sel, i).forEach(([t, p, k, notas]) => notas.forEach(n => {
     /* altura e prioridade numa chave so; batida de bateria traz a prioridade da peca */
     const k = (n.n << 4) | (n.p !== undefined ? n.p : p);
     ev.push({ t: n.t0, on: 1, k: k, v: n.v }); ev.push({ t: n.t1, on: 0, k: k });
   }));
   ev.sort((a, b) => a.t - b.t || a.on - b.on);
-  const live = new Map(); const segs = []; let cur = null;
+  const live = new Map(); const segs = []; let cur = null, ultima = null;
   /* Entre as notas soando ganha, nesta ordem: prioridade da faixa, depois a que entrou por
      ultimo, e so entao a altura.
 
@@ -748,7 +773,14 @@ function buildSegs(i){
        entrou ganha" o arco pulava de corda em corda (ver curtas()) */
     for (const [k, o] of live) if ((k & 15) === bp && bt - o.t <= ACORDE_JANELA) acorde.push(k);
     acorde.sort((a, b) => (a >> 4) - (b >> 4));
-    const k = pick === 'hi' ? acorde[acorde.length - 1] : pick === 'lo' ? acorde[0] : acorde[acorde.length >> 1];
+    /* "mais próxima": a nota do acorde mais perto da última que o arco tocou, e no empate a de
+       cima. Com aguda ou grave fixas, o acorde de guitarra que muda de inversão faz o arco pular
+       uma oitava e meia de um acorde para o outro (Back in Black: 11 a 15 saltos por minuto), e
+       o dono do projeto ouve o salto como o pior da cacofonia. Começa pela de cima. */
+    const perto = () => ultima === null ? acorde[acorde.length - 1]
+      : acorde.reduce((a, b) => Math.abs((b >> 4) - ultima) <= Math.abs((a >> 4) - ultima) ? b : a);
+    const k = pick === 'hi' ? acorde[acorde.length - 1] : pick === 'lo' ? acorde[0]
+      : pick === 'perto' ? perto() : acorde[acorde.length >> 1];
     return { n: k >> 4, v: live.get(k).v, k };
   };
   for (const e of ev){
@@ -759,7 +791,7 @@ function buildSegs(i){
     const b = best();
     /* `antiga`: a nota já soava, por baixo, e voltou quando a de cima acabou — ver curtas() */
     if (cur && (!b || cur.n !== b.n)){ cur.end = e.t; if (cur.end > cur.start + .005) segs.push(cur); cur = null; }
-    if (b && !cur) cur = { start: e.t, end: null, n: b.n, v: b.v, antiga: live.get(b.k).t < e.t - 1e-9 };
+    if (b && !cur){ cur = { start: e.t, end: null, n: b.n, v: b.v, antiga: live.get(b.k).t < e.t - 1e-9 }; ultima = b.n; }
   }
   if (cur && cur.end === null){ cur.end = duration; if (cur.end > cur.start) segs.push(cur); }
   curtas(segs);
@@ -774,6 +806,61 @@ function buildSegs(i){
     while (s.f > lim && s.n > 12){ s.n -= 12; s.f = hz(s.n); }
   });
   return segs;
+}
+/* Um dono por trecho. Com prioridade (o preset sem atropelo), as faixas de um arco entram uma de
+   cada vez, na ordem: prioridade, e empatada, a que mais tempo soa. A primeira toca inteira; cada
+   uma das outras só toca nos silêncios de mais de BRECHA_MIN das que vieram antes, e o silêncio
+   menor que isso conta como respiro de quem já tocava. Antes, quem preenchia entrava em qualquer
+   brecha, por menor que fosse, e roubava o arco nota a nota: o dono do projeto ouviu instrumentos
+   que "só aparecem às vezes" e cacofonia quando duas faixas se chocavam (Take On Me, Back in
+   Black). Com 1 s, a guitarra entrava em cada respiro do canto, 8 a 15 vezes por minuto; com 3 s,
+   só introdução, solo e trecho instrumental.
+
+   E no registro de quem é dono do arco: o dono do projeto ouviu que o pior da cacofonia é o salto
+   (uma nota em 40 Hz e a seguinte em 1200 Hz). Quem preenche desce ou sobe de oitava até a
+   mediana dele ficar perto da do dono, e quem estaria a mais de SALTO_MAX dele nem entra — o
+   Doctor Solo de Take On Me (B5) no arco do Slap Bass (C2).
+
+   Sem prioridade, tudo como antes: as faixas se somam nota a nota. Bateria fica de fora, porque
+   cada peça já traz a sua prioridade. */
+const BRECHA_MIN = 3.0, SALTO_MAX = 24;
+const mediana = ns => { if (!ns.length) return 0; const a = ns.map(n => n.n).sort((x, y) => x - y); return a[a.length >> 1]; };
+function donoPorTrecho(sel, i){
+  const lista = sel.map(([t, p, k]) => [t, p, k, notasPara(t, k, i)]);
+  if (!lista.some(x => x[1] > 0)) return lista;
+  const tempo = x => x[3].reduce((a, n) => a + n.t1 - n.t0, 0);
+  const ordem = lista.filter(x => !isDrum(x[0])).sort((a, b) => b[1] - a[1] || tempo(b) - tempo(a));
+  let frases = [];   /* o que já tem dono, com os respiros curtos fechados */
+  const juntar = iv => {
+    iv.sort((a, b) => a[0] - b[0]); const out = [];
+    iv.forEach(([a, b]) => { const u = out[out.length - 1]; if (u && a - u[1] < BRECHA_MIN) u[1] = Math.max(u[1], b); else out.push([a, b]); });
+    return out;
+  };
+  const out = lista.filter(x => isDrum(x[0]));
+  const ref = ordem.length ? mediana(ordem[0][3]) : 0;
+  ordem.forEach(([t, p, k, notas], j) => {
+    let fica = notas;
+    if (j){
+      const m = mediana(notas);
+      if (Math.abs(m - ref) > SALTO_MAX){ out.push([t, p, k, []]); return; }
+      const oit = 12 * Math.round((ref - m) / 12);
+      /* os silêncios de quem veio antes, de BRECHA_MIN ou mais */
+      const brechas = []; let fim = 0;
+      frases.forEach(([a, b]) => { if (a - fim >= BRECHA_MIN) brechas.push([fim, a]); fim = Math.max(fim, b); });
+      if (duration - fim >= BRECHA_MIN) brechas.push([fim, duration]);
+      fica = [];
+      notas.forEach(n => {
+        /* a nota entra se começa dentro da brecha; acaba, no máximo, 30 ms antes de quem volta */
+        const b = brechas.find(([a, z]) => n.t0 >= a && n.t0 < z);
+        if (!b) return;
+        const t1 = Math.min(n.t1, b[1] - .03);
+        if (t1 - n.t0 >= .08) fica.push(t1 === n.t1 && !oit ? n : Object.assign({}, n, { t1, n: n.n + oit }));
+      });
+    }
+    frases = juntar(frases.concat(fica.map(n => [n.t0, n.t1])));
+    out.push([t, p, k, fica]);
+  });
+  return out;
 }
 /* Trecho curto no arco é estalo. O que sai, nos casos que o dono do projeto ouviu:
    - a nota antiga que reaparece no respiro: no MIDI que sai do MuseScore cada nota acaba um pouco
@@ -1200,17 +1287,52 @@ function bestPartition(){
 
   const out = tracks.map(() => 'O'), pr = tracks.map(() => 0);
   out[li] = 'R'; pr[li] = 3;
-  const base = resto[0];
+  /* A base é a que mais soa, mas pad e naipe de cordas valem menos: acorde parado o tempo todo,
+     reduzido a uma nota, vira um zumbido sem ritmo. Em Take On Me a base era o String Sect 3
+     (91% da música), e o dono do projeto pôs o Slap Bass no lugar. */
+  /* Acorde se conta pelo ataque, não pela polifonia: nota sustentada que encosta na seguinte
+     conta como duas soando, e o riff de Take On Me (12% dos ataques em acorde) tirava 2,35 —
+     passava por pad e ficava fora da melodia. */
+  const juntos = t => { const s = t.notes.map(n => n.t0).sort((a, b) => a - b); let c = 0;
+    for (let k = 1; k < s.length; k++) if (s[k] - s[k - 1] < ACORDE_JANELA) c++; return s.length ? c / s.length : 1; };
+  const pad = i => /pad|string|str\b|choir|coro|aahs|oohs|sweep|warm/i.test(tracks[i].name) || juntos(tracks[i]) >= .5;
+  const base = resto.slice().sort((a, b) => tam[b] * (pad(b) ? .4 : 1) - tam[a] * (pad(a) ? .4 : 1))[0];
   out[base] = 'L'; pr[base] = 2;
 
-  const cheio = occ[base].slice();
-  for (const i of resto.slice(1)){
+  /* O resto preenche os silêncios de um dos lados (donoPorTrecho decide quando). Faixa melódica —
+     uma voz, no registro da melodia — vai para o lado da melodia: é o riff que toca enquanto o
+     canto descansa, como o dono do projeto montou à mão em Take On Me. As outras, para a base. */
+  const medLead = avgPitch(tracks[li]);
+  const medBase = avgPitch(tracks[base]);
+  const perto = (i, m) => Math.abs(avgPitch(tracks[i]) - m) <= SALTO_MAX;   /* ver donoPorTrecho */
+  const melodica = i => !isBass(tracks[i]) && !pad(i) && juntos(tracks[i]) < .3 && avgPitch(tracks[i]) >= medLead - 7 && perto(i, medLead);
+  const cheio = { R: occ[li].slice(), L: occ[base].slice() };
+  for (const i of resto){
+    if (i === base) continue;
+    const lado = melodica(i) ? 'R' : 'L';
+    if (!perto(i, lado === 'R' ? medLead : medBase)) continue;
     let novo = 0;
-    for (let k = 0; k < nb; k++) if (occ[i][k] && !cheio[k]) novo++;
+    for (let k = 0; k < nb; k++) if (occ[i][k] && !cheio[lado][k]) novo++;
     /* so entra quem traz brecha de verdade: nem a sombra da base, nem um punhado de notas soltas */
     if (novo < nb * .06 || novo < tam[i] * .3) continue;
-    out[i] = 'L'; pr[i] = 1;
-    for (let k = 0; k < nb; k++) if (occ[i][k]) cheio[k] = 1;
+    out[i] = lado; pr[i] = 1;
+    for (let k = 0; k < nb; k++) if (occ[i][k]) cheio[lado][k] = 1;
+  }
+  /* Lado da melodia calado mais da metade da música — rock em que só a voz é linha de uma nota
+     (Enter Sandman, Back in Black: o canto em 25 a 29%, e o riff de fora): entra a faixa que mais
+     silêncio dele cobre, mesmo em acorde, com a nota de cima. Nunca o baixo nem pad de nome. */
+  const soa = lado => cheio[lado].reduce((a, x) => a + x, 0);
+  for (let rodada = 0; rodada < 2 && soa('R') < nb * .5; rodada++){
+    let melhor = -1, mv = 0;
+    for (const i of resto){
+      if (out[i] !== 'O' || isBass(tracks[i]) || !perto(i, medLead) || /pad|string|str\b|choir|coro|aahs|oohs|sweep|warm/i.test(tracks[i].name)) continue;
+      let novo = 0;
+      for (let k = 0; k < nb; k++) if (occ[i][k] && !cheio.R[k]) novo++;
+      if (novo > mv){ mv = novo; melhor = i; }
+    }
+    if (melhor < 0 || mv < nb * .1) break;
+    out[melhor] = 'R'; pr[melhor] = 1;
+    for (let k = 0; k < nb; k++) if (occ[melhor][k]) cheio.R[k] = 1;
   }
   prio = pr;
   return out;
@@ -1650,7 +1772,7 @@ function initialCfg(){
   /* o .json do acervo descreve dois canais: só vale com dois flybacks */
   if (current.sidecar && nCanais() === 2 && applyCfg(current.sidecar)){ $('cfgMsg').textContent = 'Configuração que veio com a música no acervo.'; return; }
   resetControls(); renderStrips();
-  if (dois()){ preset('bass', false); $('cfgMsg').textContent = 'Padrão: baixo e melodia. Qualquer ajuste fica salvo neste navegador.'; }
+  if (dois()){ preset('complement', false); $('cfgMsg').textContent = 'Padrão: melodia inteira, resto sem atropelo. Qualquer ajuste fica salvo neste navegador.'; }
   else { preset('um', false); $('cfgMsg').textContent = 'Padrão: montagem fixa. Rotas, acorde e oitava ficam salvos por música; o som de cada instrumento e o ganho de cada flyback, para todas.'; }
 }
 $('cfgReset').onclick = () => { if (!current) return; store.del(cfgChave()); initialCfg(); };
@@ -1665,10 +1787,10 @@ $('cfgDown').onclick = () => {
 
 /* ---------- canais: um módulo de mixer por flyback ---------- */
 /* nota do acorde, como vai no .json */
-const ACORDE = { hi: 'agudo', meio: 'meio', lo: 'grave', div: 'repartir' };
+const ACORDE = { hi: 'agudo', meio: 'meio', lo: 'grave', perto: 'perto', div: 'repartir' };
 const OPC = {
   oct: [['-2', '−2'], ['-1', '−1'], ['0', 'igual'], ['1', '+1'], ['2', '+2']],
-  pick: [['hi', 'aguda'], ['meio', 'do meio'], ['lo', 'grave'], ['div', 'repartir']],
+  pick: [['hi', 'aguda'], ['meio', 'do meio'], ['lo', 'grave'], ['perto', 'mais próxima'], ['div', 'repartir']],
   env: [['nenhum', 'OOK'], ['percussivo', 'batida'], ['medio', 'médio'], ['sustentado', 'longo'], ['corda', 'corda']],
   vel: [['sim', 'segue'], ['nao', 'ignora']]
 };
@@ -2336,16 +2458,20 @@ const cabe6 = it => cabe2(it) || (it.aproveitamento6 || 0) >= APROV6_MIN;
    pessoa (antiga, de 8 a 16 faixas) ou pela IA (uma faixa por instrumento). Dentro da vista,
    um seletor de artista ou grupo, um de gênero e a busca; os filtros ficam num menu que só abre
    quando pedido. "Meus" aparece só para quem guardou arquivos neste navegador. */
-const VISTAS = [['', 'tudo'], ['antigas', 'antigas'], ['transcritas', 'transcritas'], ['meus', 'meus']];
+const VISTAS = [['', 'tudo'], ['antigas', 'antigas'], ['temas', 'temas'], ['transcritas', 'transcritas'], ['meus', 'meus']];
 let vista = '', temMeus = false;
 /* quem transcreveu: MuScriptor na GPU daqui, Mirelo (interface ou API) ou, sem campo, MIDI
    nativo, escrito por uma pessoa. Arquivo aberto do computador não tem como saber. */
 const ORIGEM = { muscriptor: 'MuScriptor', mirelo: 'Mirelo' };
 const origemDe = it => ORIGEM[it.origem] || (it.pasta === PASTA_MEUS ? '' : 'nativo');
 const ehTranscrita = it => it.pasta === 'transcritas' || it.pasta.startsWith('transcritas/');
+/* temas: jogos, desenhos, filmes, Brasil (tools/baixar_temas.py); antigas é o resto do que uma
+   pessoa sequenciou, que não é transcrição nem os meus */
+const ehTema = it => it.pasta === 'temas' || it.pasta.startsWith('temas/');
 const naVista = (it, v = vista) => v === 'transcritas' ? ehTranscrita(it)
   : v === 'meus' ? it.pasta === PASTA_MEUS
-  : v === 'antigas' ? !ehTranscrita(it) && it.pasta !== PASTA_MEUS : true;
+  : v === 'temas' ? ehTema(it)
+  : v === 'antigas' ? !ehTranscrita(it) && !ehTema(it) && it.pasta !== PASTA_MEUS : true;
 /* "+ de 2 canais": só soa bem com mais de dois flybacks — cabe em seis e não cabe em dois */
 const precisaMais = it => !cabe2(it) && (it.aproveitamento6 || 0) >= APROV6_MIN;
 const filtro = () => ({ voz: $('fVoz').checked, dois: $('f2').checked, mais: $('fMais').checked, topo: $('fTopo').checked });
@@ -2736,7 +2862,7 @@ $('espN').onchange = e => {
   if (tracks.length){
     if ((antes === 2) !== (n === 2)) initialCfg();
     else if (store.get(cfgChave())){ assign = assign.map(m => m & mascara()); saveCfg(); }
-    else preset(dois() ? 'bass' : 'um', false);
+    else preset(dois() ? 'complement' : 'um', false);
   } else resetControls();
   ligarSaida(); wavReset(); serialPinos(); renderTudo();
 };
@@ -2908,26 +3034,44 @@ document.addEventListener('keydown', e => {
   } else if (e.key === 'Home'){ e.preventDefault(); stop(); }
 });
 
-/* divisória entre a metade de cima e a doca, lembrada no navegador */
-(() => {
-  const sp = $('split'), topo = $('topo');
-  const lim = h => Math.max(150, Math.min(innerHeight - 230, h));
-  const salva = +store.get('topo');
-  if (salva > 0) topo.style.height = lim(salva) + 'px';
-  let y0 = 0, a0 = 0, drag = false;
-  const fixa = h => { topo.style.height = lim(h) + 'px'; };
-  const guarda = () => store.set('topo', Math.round(topo.getBoundingClientRect().height));
-  sp.addEventListener('pointerdown', e => { drag = true; y0 = e.clientY; a0 = topo.getBoundingClientRect().height; sp.setPointerCapture(e.pointerId); sp.classList.add('drag'); });
-  sp.addEventListener('pointermove', e => { if (drag) fixa(a0 + e.clientY - y0); });
-  const fim = () => { if (!drag) return; drag = false; sp.classList.remove('drag'); guarda(); };
+/* Divisórias entre os painéis: arrastam, andam com as setas e lembram o tamanho neste navegador;
+   duplo clique volta ao padrão. `alvo` é o painel que muda de tamanho; `sinal` -1 quando ele fica
+   depois da divisória (a saída, que cresce para a esquerda). Pedido do dono do projeto: poder
+   alargar a lista de músicas, subir os canais, dar mais espaço às faixas ou à prévia. */
+function divisoria(sp, alvo, eixo, chave, lim, sinal = 1){
+  const prop = eixo === 'x' ? 'width' : 'height';
+  const med = () => alvo.getBoundingClientRect()[prop];
+  const ponto = e => eixo === 'x' ? e.clientX : e.clientY;
+  const fixa = v => { alvo.style[prop] = Math.round(lim(v)) + 'px'; };
+  const salva = +store.get(chave);
+  if (salva > 0) fixa(salva);
+  let p0 = 0, a0 = 0, drag = false;
+  const guarda = () => store.set(chave, Math.round(med()));
+  sp.addEventListener('pointerdown', e => {
+    drag = true; p0 = ponto(e); a0 = med(); sp.setPointerCapture(e.pointerId); sp.classList.add('drag');
+    document.body.classList.add('arrastando'); document.body.classList.toggle('linha', eixo === 'y');
+  });
+  sp.addEventListener('pointermove', e => { if (drag) fixa(a0 + sinal * (ponto(e) - p0)); });
+  const fim = () => {
+    if (!drag) return;
+    drag = false; sp.classList.remove('drag'); document.body.classList.remove('arrastando', 'linha'); guarda();
+  };
   sp.addEventListener('pointerup', fim); sp.addEventListener('pointercancel', fim);
   sp.addEventListener('keydown', e => {
-    const d = e.key === 'ArrowUp' ? -24 : e.key === 'ArrowDown' ? 24 : 0;
+    const [menos, mais] = eixo === 'x' ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown'];
+    const d = e.key === menos ? -24 : e.key === mais ? 24 : 0;
     if (!d) return;
-    e.preventDefault(); fixa(topo.getBoundingClientRect().height + d); guarda();
+    e.preventDefault(); fixa(med() + sinal * d); guarda();
   });
-  sp.addEventListener('dblclick', () => { topo.style.height = ''; store.del('topo'); });
-})();
+  sp.addEventListener('dblclick', () => { alvo.style[prop] = ''; store.del(chave); });
+}
+divisoria($('split'), $('topo'), 'y', 'topo', h => Math.max(150, Math.min(innerHeight - 230, h)));
+divisoria($('splitAcervo'), document.querySelector('.app > .acervo'), 'x', 'largAcervo',
+  w => Math.max(260, Math.min(innerWidth - 720, w)));
+divisoria($('splitFaixas'), document.querySelector('.topo > .faixas'), 'x', 'largFaixas',
+  w => Math.max(260, Math.min($('topo').clientWidth - 280, w)));
+divisoria($('splitSaida'), document.querySelector('.doca > .saida'), 'x', 'largSaida',
+  w => Math.max(240, Math.min(document.querySelector('.doca').clientWidth - 220, w)), -1);
 
 function tick(){
   const p = scrubbing ? scrubAt : position();

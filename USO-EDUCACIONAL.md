@@ -9,7 +9,7 @@ A finalidade é **educacional e de divulgação científica, sem fins lucrativos
 é reproduzido em rádio, em transmissão ao vivo, em evento pago nem em qualquer contexto
 monetizado, e o repositório não tem publicidade, patrocínio, assinatura ou botão de doação.
 
-## O acervo tem quatro origens, com situações diferentes
+## O acervo tem cinco origens, com situações diferentes
 
 ### 1. `musicas/classicos` — domínio público e licença livre
 
@@ -73,6 +73,19 @@ Duas consequências que vale deixar explícitas:
   próprio modelo, não destes arquivos, e é compatível com a finalidade declarada aqui; mas quem
   reaproveitar a ferramenta para outro fim precisa olhar essa licença.
 
+### 5. `musicas/temas` — temas de jogos, desenhos, filmes e séries
+
+Mesma situação da pasta `bandas`: **as obras continuam protegidas** (a exceção é o Hino Nacional,
+de domínio público), e vale tudo o que está escrito ali, inclusive a ressalva de que atribuir
+autoria não substitui licença. Os arquivos são transcrições feitas por pessoas e publicadas
+abertamente: no VGMusic (MIDIs de jogo, com o nome de quem sequenciou), no MuseScore (edições
+que os autores marcaram como domínio público ou CC0, pelo acervo PDMX), no acervo Lakh e no
+BitMidi. `musicas/temas/creditos.json` registra, arquivo por arquivo, quem compôs, quem
+transcreveu e de onde veio.
+
+Do BitMidi, que pede que robôs não baixem os arquivos, nada é baixado automaticamente: a
+ferramenta abre a página no navegador e uma pessoa clica em baixar.
+
 ## Pedido de remoção
 
 Se você detém direitos sobre alguma obra aqui e quer que ela saia, **abra uma issue ou um pull
@@ -88,10 +101,10 @@ a alteração: o índice é regerado a cada publicação.
 
 O **código** (as páginas HTML, os scripts em `tools/`) e a **documentação** são do projeto e
 podem ser reaproveitados. O **acervo** não é homogêneo: `classicos` e `rock e metal` você pode
-levar junto, respeitada a atribuição; `bandas` é decisão sua, feita com consciência do que está
-escrito acima.
+levar junto, respeitada a atribuição; `bandas` e `temas` são decisão sua, feita com consciência
+do que está escrito acima.
 
-A ferramenta `tools/baixar_bandas.py` apenas automatiza o acesso a sites públicos que já
-distribuem essas transcrições abertamente. Ela não quebra proteção, não burla autenticação e
-não contorna limite de acesso — e trabalha devagar de propósito, com uma chamada por segundo e
+As ferramentas `tools/baixar_bandas.py` e `tools/baixar_temas.py` apenas automatizam o acesso a sites públicos que já
+distribuem essas transcrições abertamente. Elas não quebram proteção, não burlam autenticação e
+não contornam limite de acesso — e trabalham devagar de propósito, com uma chamada por segundo e
 identificação no `User-Agent`, porque são sites pequenos mantidos por uma pessoa só.

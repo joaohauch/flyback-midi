@@ -84,7 +84,7 @@ Presets de roteamento implementados:
 | Baixo e melodia | faixa de nota média mais grave à esquerda, mais aguda à direita |
 | Guitarras somadas | faixas com nome de guitarra somadas à direita, baixo à esquerda |
 | Principal e acompanhamento | faixa com mais notas sozinha à direita, resto somado à esquerda |
-| Melodia inteira, resto sem atropelo | a melodia sai inteira à direita; à esquerda, a base e o que couber nas brechas dela |
+| Melodia inteira, resto sem atropelo | **padrão de dois flybacks** (antes era "Baixo e melodia", que numa amostra de 60 bandas deixava o lado da melodia soando 19% da música; este, 60%). A melodia sai inteira à direita; à esquerda, a base; quem preenche entra só nos silêncios longos de um dos lados |
 | Grave e agudo | ordena por nota média e divide ao meio |
 
 No modo ESP os presets são outros, porque os de cima são pensados para dois lados:
@@ -155,9 +155,13 @@ A troca no `best()` de `buildSegs` para aceitar "do meio" foi verificada contra 
 1. `scoreVoz()` escolhe a faixa principal, de preferência a voz. Pontua monofonia (`monofonia()`, fração de notas que entram sem nada mais soando na faixa — linha de canto fica perto de 1, naipe de acordes perto de 0), altura média, cobertura do tempo, mais um bônus para nome de voz ou melodia (`RX_VOZ`, que pega tanto nome de faixa quanto programa General MIDI: Choir Aahs, Voice Oohs, Lead 1…) e uma penalidade para baixo.
 2. Essa faixa vai **sozinha** para a direita, com prioridade 3, e sai inteira.
 3. À esquerda vai a faixa de maior cobertura como base, com prioridade 2.
-4. As demais entram à esquerda com prioridade 1, e só se trouxerem brecha de verdade: pelo menos 6% da duração da música em tempo que a base não ocupa, e pelo menos 30% do material próprio.
+4. A base é a de maior cobertura, mas pad e naipe de cordas (pelo nome, ou com metade dos ataques em acorde) valem 40%: acorde parado vira zumbido. Em Take On Me a base passou do String Sect 3 ao Slap Bass.
+5. As demais entram com prioridade 1, e só se trouxerem brecha de verdade: pelo menos 6% da duração da música em tempo que o lado não ocupa, e pelo menos 30% do material próprio. Faixa melódica (menos de 30% dos ataques em acorde, no registro da melodia) vai para o lado da melodia: é o riff que toca enquanto o canto descansa. As outras, para a base. Lado da melodia soando menos da metade da música (rock em que só a voz é linha de uma nota): entra a guitarra que mais silêncio dele cobre, mesmo em acorde.
+6. Ninguém a mais de duas oitavas (`SALTO_MAX`) da média do dono do lado entra nele.
 
-Quem decide no choque é a prioridade, não a altura: `buildSegs()` monta a chave de cada nota como `(altura << 4) | prioridade` e, no instante em que mais de uma nota está soando, escolhe primeiro pela prioridade e só depois pela altura. Assim a base nunca perde uma nota para quem está preenchendo as brechas — medido sobre os MIDIs de `exemplos`, `bandas` e uma amostra de `classicos`, a linha da base é idêntica tocando sozinha ou dentro do canal.
+**Um dono por trecho** (`donoPorTrecho()`, nov/2026). Com prioridade, as faixas de um arco entram uma de cada vez: a primeira toca inteira, e cada uma das outras só nos silêncios de 3 s ou mais (`BRECHA_MIN`) das que vieram antes, transposta de oitava até a mediana dela ficar perto da do dono. Antes, quem preenchia entrava em qualquer brecha e roubava o arco nota a nota, e o dono do projeto ouviu instrumentos que "só aparecem às vezes" e cacofonia. O que mais pesa para ele é o salto: uma nota em 40 Hz e a seguinte em 1200 Hz soa horrível. Com 1 s de brecha a guitarra entrava em cada respiro do canto, 8 a 15 vezes por minuto; com 3 s, só introdução, solo e trecho instrumental. Os saltos que sobram vêm de dentro de uma faixa, do acorde reduzido a uma nota.
+
+Dentro do trecho de cada um, quem decide no choque é a prioridade, não a altura: `buildSegs()` monta a chave de cada nota como `(altura << 4) | prioridade` e, no instante em que mais de uma nota está soando, escolhe primeiro pela prioridade e só depois pela altura. Assim a base nunca perde uma nota para quem está preenchendo as brechas — medido sobre os MIDIs de `exemplos`, `bandas` e uma amostra de `classicos`, a linha da base é idêntica tocando sozinha ou dentro do canal.
 
 Com todas as faixas em prioridade 0 — que é como os outros presets ficam — `buildSegs()` se comporta exatamente como antes. A prioridade vai junto na configuração salva, como campo opcional `prioridade` de cada faixa.
 
@@ -303,12 +307,12 @@ Estado no endereço (`?f=…&o=…&g=…&l=…&v=…`) e no `localStorage`. A gr
 
 O dono do projeto passou a usar só pelo computador, e o layout de coluna única, pensado para o celular, desperdiçava a tela em paisagem. Agora é uma interface de editor, no espírito do OBS ou de um editor de vídeo, com a janela inteira ocupada e cada painel rolando por dentro:
 
-- **Em cima, à esquerda — Faixas.** As faixas da música aberta, cada uma com uma luz que acende quando ela tem nota soando e o seletor de saída (E/D/ambos no estéreo, 1 a N no ESP). Os presets, o aproveitamento por canal e o crédito ficam aqui.
-- **Em cima, à direita — Saídas.** Uma pista por flyback: nome, pino ou lado, nota e frequência que está soando, de onde vem (as faixas roteadas), um osciloscópio com três ciclos da nota disparado na borda de subida, e um rolo com a linha monofônica correndo numa janela de 5 a 40 s, com o cursor a um quarto da largura para mostrar o que vem.
-- **Transporte**, entre as duas metades, com a linha do tempo da música inteira (uma faixa por saída) que serve de busca.
-- **Embaixo — a doca**, três painéis lado a lado: **Acervo**, **Canais** (um módulo de mixer por flyback, com M e S, ganho, agudo máx, oitava, acorde, envelope e dinâmica) e **Saída** (o painel do modo: no estéreo, a explicação do P2; no ESP, a conexão e os pinos; nos dois, WAV e configuração).
+- **À esquerda, na altura inteira — Acervo.** Vistas (tudo, antigas, temas, transcritas, meus), filtros, busca e a lista, em linhas compactas. Foi da doca para cá em nov/2026, a pedido do dono do projeto: embaixo cabiam poucas linhas.
+- **Em cima, à direita, meio a meio — Faixas e Saídas.** Faixas: as faixas da música aberta, cada uma com uma luz que acende quando ela tem nota soando e o seletor de saída (E/D/ambos no estéreo, 1 a N no ESP); os presets, o aproveitamento por canal e o crédito ficam aqui. Saídas: uma pista por flyback, com nome, pino ou lado, nota e frequência que está soando, de onde vem (as faixas roteadas), um osciloscópio com três ciclos da nota disparado na borda de subida, e um rolo com a linha monofônica numa janela de 5 a 40 s (padrão 5 s), com o cursor a um quarto da largura. A prévia tinha 3/4 da largura e mostrava as notas longe demais à frente.
+- **Transporte**, embaixo das duas, com a linha do tempo da música inteira (uma faixa por saída) que serve de busca.
+- **Embaixo — a doca**: **Canais** (um módulo de mixer por flyback, com M e S, ganho, agudo máx, oitava, acorde, envelope e dinâmica) e **Saída** (o painel do modo: no estéreo, a explicação do P2; no ESP, a conexão e os pinos; nos dois, WAV e configuração).
 
-A divisória entre as duas metades arrasta (e anda com as setas), e o tamanho fica lembrado; duplo clique volta ao padrão. O padrão dá à doca uma altura estável (`clamp(200px, 100vh − 480px, 70vh)` para a metade de cima), porque é a doca que precisa de altura para o acervo e o mixer caberem — com a metade de cima proporcional à tela, a 1366×768 o acervo mostrava uma música só. A pista esconde a linha de faixas quando fica baixa demais, por container query.
+Quatro divisórias arrastam (e andam com as setas), e o tamanho fica lembrado no navegador; duplo clique volta ao padrão (`divisoria()`): acervo × resto, faixas × saídas, metade de cima × doca, canais × saída. O padrão dá à doca uma altura estável (`clamp(200px, 100vh − 480px, 70vh)` para a metade de cima). A pista esconde a linha de faixas quando fica baixa demais, por container query.
 
 Não há barra no topo. O nome da música abre o painel de faixas; o número de flybacks, a placa, a conexão e o botão **Gerador de tom** (que leva ao `tom.html`, onde há o "voltar para MIDI") ficam no painel de saída. Mudar o número de flybacks pausa; entrar ou sair de dois troca o espaço de configuração (`cfg:` / `cfgmont:`) e carrega a daquele espaço.
 
