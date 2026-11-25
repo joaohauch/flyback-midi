@@ -1226,5 +1226,16 @@
   "aproveitamento": 65,
   "aproveitamento6": 85,
   "estilo": "Eletrônica"
+ },
+ "Orquestra e Coro Cid - Hino do Flamengo.mid": {
+  "autor": "Lamartine Babo",
+  "artista": "Orquestra e Coro Cid",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "\"Hino do Flamengo\" (Uma vez Flamengo), de Lamartine Babo (1945); interpretação da Orquestra e Coro Cid",
+  "transcricao": "MuScriptor large (Kyutai/Mirelo) rodado localmente, transcrição automática do áudio, sem transcritor humano; instrumentos detectados pelo PANNs: voice, brass_section",
+  "fonte": "https://www.youtube.com/watch?v=-hl-UJe0qDo",
+  "vocal": "sim · faixa \"voice\"",
+  "aproveitamento": 46,
+  "aproveitamento6": 64
  }
 }
