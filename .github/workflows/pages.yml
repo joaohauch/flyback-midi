@@ -40,5 +40,11 @@ jobs:
         with:
           path: _site
 
+      # Em nov/2026 o deploy falhou várias vezes com "No artifacts named github-pages were
+      # found" logo depois de o artefato subir sem erro, e passou ao rodar de novo: a API de
+      # artefatos demora a enxergar o que acabou de subir. A espera evita o reenvio à mão.
+      - name: Esperar o artefato aparecer na API
+        run: sleep 15
+
       - id: deploy
         uses: actions/deploy-pages@v5
