@@ -1151,5 +1151,41 @@
   "aproveitamento": 85,
   "aproveitamento6": 75,
   "estilo": "Rock"
+ },
+ "PSY - Gangnam Style.mid": {
+  "autor": "PSY",
+  "artista": "PSY",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "interpretação de PSY; \"Gangnam Style\"",
+  "transcricao": "MuScriptor large (Kyutai/Mirelo) rodado localmente, transcrição automática do áudio, sem transcritor humano; instrumentos escolhidos à mão: voice, synth lead, synth pad, electric bass, drums",
+  "fonte": "https://www.youtube.com/watch?v=9bZkp7q19f0",
+  "vocal": "sim · faixa \"voice\"",
+  "aproveitamento": 44,
+  "aproveitamento6": 69,
+  "estilo": "Pop"
+ },
+ "BTS - Dynamite.mid": {
+  "autor": "BTS",
+  "artista": "BTS",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "interpretação de BTS; \"Dynamite\"",
+  "transcricao": "MuScriptor large (Kyutai/Mirelo) rodado localmente, transcrição automática do áudio, sem transcritor humano; instrumentos escolhidos à mão: voice, brass section, clean electric guitar, electric bass, drums",
+  "fonte": "https://www.youtube.com/watch?v=gdZLi9oWNZg",
+  "vocal": "sim · faixa \"voice\"",
+  "aproveitamento": 47,
+  "aproveitamento6": 69,
+  "estilo": "Pop"
+ },
+ "BLACKPINK - How You Like That.mid": {
+  "autor": "BLACKPINK",
+  "artista": "BLACKPINK",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "interpretação de BLACKPINK; \"How You Like That\"",
+  "transcricao": "MuScriptor large (Kyutai/Mirelo) rodado localmente, transcrição automática do áudio, sem transcritor humano; instrumentos escolhidos à mão: voice, synth lead, synth pad, electric bass, drums",
+  "fonte": "https://www.youtube.com/watch?v=ioNng23DkIM",
+  "vocal": "sim · faixa \"voice\"",
+  "aproveitamento": 50,
+  "aproveitamento6": 74,
+  "estilo": "Pop"
  }
 }
