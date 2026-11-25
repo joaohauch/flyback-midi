@@ -13,6 +13,10 @@ Ao terminar, anote o resultado em **Resultados**, no fim deste arquivo, e faça 
 ganhou o modo "ESP32 pela serial". Se este repositório foi clonado antes, rode `git pull` antes
 do passo 2.
 
+**Mudou em nov/2026:** envelope e força das notas no arco (mensagem `E` e o quarto campo do
+`N`), pela fração aberta de cada período. O `testar_serial.py` ganhou o teste de envelope. Resumo
+em `docs/atualizacoes.md`. **Grave o firmware de novo** depois do `git pull`.
+
 **Mudou de novo em 16 e 21/out** — o resumo de tudo, com o porquê, está em
 `docs/atualizacoes.md`. No firmware: motivo do último reinício no `?`, pinos da flash recusados e o
 teste pelo botão BOOT, sem computador. No gerador de tom: placa e pino escolhidos na página, e só o
@@ -33,8 +37,9 @@ canal 1 configurado. **Grave o firmware de novo** depois do `git pull`.
 - **Firmware:** o v1, que liga e desliga o arco na frequência da nota, mais o `D` do gerador de
   tom: tom contínuo com a fração aberta de cada período (500 ‰ = onda quadrada, o volume
   máximo), que apaga sozinho 2 s depois do último `D`; e o teste pelo botão BOOT (440 Hz no GPIO
-  4). O envelope (`docs/envelope-v5.md`) é para a placa V5, que ainda não existe; não faz parte
-  deste teste.
+  4). Desde nov/2026, também o envelope e a força de cada nota, pela fração aberta (`E` e o
+  quarto campo do `N`). O envelope pelo pino ENV (`docs/envelope-v5.md`) é para a placa V5, que
+  ainda não existe; não faz parte deste teste.
 
 Contexto para quem não conhece o projeto: `CLAUDE.md` (seção "Saída serial") e
 `docs/protocolo-serial.md`, que descreve as mensagens e, no fim, o firmware.
@@ -104,11 +109,14 @@ python firmware/testar_serial.py COM5
 
 Esperado:
 
-- `← flyback-esp32 pronto · lógica direta (ALTO libera o arco) · 6 canais · reinício: ...`
+- `← flyback-esp32 pronto · nov/2026 · envelope · lógica direta (ALTO libera o arco) · 6 canais · reinício: ...`
+  (sem o `nov/2026 · envelope`, a placa está com o firmware antigo: grave de novo)
 - a resposta do `?` com `lógica direta`, os pinos `18 19 21 22 23 25`, `ligado há N s` e
   `último reinício: ...`
 - no osciloscópio (ou no LED): GPIO 18 e 19 **em BAIXO parados**; onda quadrada de 440 Hz e 50%
-  por 1 s em cada um, um de cada vez; depois a escala no 18; depois 220 Hz no 18 por uns 3 s
+  por 1 s em cada um, um de cada vez; depois a escala no 18; depois três notas de 220 Hz e 2 s no
+  18 — pulso parado em 50%, pulso estreitando até ~4% ("corda") e pulso parado em ~10% (força
+  30%); depois 220 Hz no 18 por uns 3 s
   (o `D` renovado) e, sem renovar, **BAIXO de novo em até 2 s** — é o desligamento automático do
   tom contínuo; no fim, BAIXO.
 
@@ -118,14 +126,18 @@ Arduino IDE ou o próprio script antes do passo 7.
 ## 6. Conferir à mão (opcional)
 
 Num monitor serial a 115200 (`arduino-cli monitor -p COM5 -c baudrate=115200`), as linhas do
-protocolo funcionam digitadas: `R`, `N 0 0 440.00`, `F 0 2000`, `X`, `?`.
+protocolo funcionam digitadas: `R`, `N 0 0 440.00`, `F 0 2000`, `X`, `?`. Envelope: `E 0 4 900 0 6`
+e depois `R`, `N 0 0 220.00`, `F 0 2000`; força: `N 0 0 220.00 300`.
 
 ## 7. Pelo site
 
 1. Chrome ou Edge, em https://joaohauch.github.io/flyback-midi/
 2. Painel de saída: **Flybacks 2**, **Placa ESP32**, pinos 18 e 19, 115200, **Conectar ESP32**.
 3. "testar" em cada canal: um lá de 0,6 s.
-4. Abrir uma música e tocar. Com 2 flybacks a serial manda só os canais 1 e 2.
+4. Abrir uma música e tocar. Com 2 flybacks a serial manda só os canais 1 e 2. Com o painel
+   "Linhas enviadas" aberto, cada canal recebe um `E` antes do `R`, e cada `N` traz a força no
+   fim. Trocar o envelope do canal no mixer (nenhum, corda, percussivo) e tocar de novo: o arco
+   tem de mudar como o som do computador muda.
 5. Desconectar no player (só uma página usa a porta por vez) e abrir o **gerador de tom**
    (https://joaohauch.github.io/flyback-midi/tom.html; Ctrl+F5 se acabou de sair versão nova). Em
    "Saída", **ESP32 pela serial**, **Placa ESP32** (a mesma do player) → **Conectar ESP32**.
@@ -142,7 +154,10 @@ música → parar → desligar a potência → só então tirar o USB.
 
 Com a potência ligada, o gerador de tom pelo ESP é o jeito de achar o vale de cada flyback e
 medir: frequência fixa num canal por vez, varredura, e o volume (a fração aberta) para ver quanto
-o arco perde abaixo de 50%. Anote em Resultados o que ouvir e medir em cada canal.
+o arco perde abaixo de 50%. Anote em Resultados o que ouvir e medir em cada canal — e, para o
+envelope, **abaixo de que fração aberta o arco deixa de soar** (no gerador de tom, baixando o
+volume até sumir): se for alto, o fim do decaimento some antes da hora, e o firmware precisa de
+um mínimo.
 
 ## Teste sem computador (botão BOOT)
 

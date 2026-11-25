@@ -1,464 +1,590 @@
 {
- "jogos/Undertale/Megalovania.mid": {
+ "jogos/Toby Fox/Undertale/Undertale - Megalovania.mid": {
   "autor": "Toby Fox",
-  "artista": "Undertale",
+  "artista": "Toby Fox",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Toby Fox; partitura de zacharyjohnston.official no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de zacharyjohnston.official no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "jogos",
   "fonte": "https://musescore.com/user/184744/scores/2110946",
   "aproveitamento": 80,
   "aproveitamento6": 77
  },
- "jogos/Undertale/Hopes and Dreams.mid": {
+ "jogos/Toby Fox/Undertale/Undertale - Hopes and Dreams.mid": {
   "autor": "Toby Fox",
-  "artista": "Undertale",
+  "artista": "Toby Fox",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Toby Fox; sequenciada por Dracula9AntiChapel no VGMusic",
   "transcricao": "sequenciada por Dracula9AntiChapel no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/computer/microsoft/windows/Undertale_Hopes-and-Dreams.mid",
   "aproveitamento": 64,
   "aproveitamento6": 75
  },
- "jogos/Undertale/Spider Dance.mid": {
+ "jogos/Toby Fox/Undertale/Undertale - Spider Dance.mid": {
   "autor": "Toby Fox",
-  "artista": "Undertale",
+  "artista": "Toby Fox",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Toby Fox; sequenciada por Mrshadowcat no VGMusic",
   "transcricao": "sequenciada por Mrshadowcat no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/computer/microsoft/windows/Undertale_Spider_Dance.mid",
   "aproveitamento": 86,
   "aproveitamento6": 92
  },
- "jogos/Undertale/Bonetrousle.mid": {
+ "jogos/Toby Fox/Undertale/Undertale - Bonetrousle.mid": {
   "autor": "Toby Fox",
-  "artista": "Undertale",
+  "artista": "Toby Fox",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Toby Fox; sequenciada por Jay Reichard no VGMusic",
   "transcricao": "sequenciada por Jay Reichard no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/computer/microsoft/windows/Undertale_-_Bonetrousle.mid",
   "aproveitamento": 66,
   "aproveitamento6": 89
  },
- "jogos/Undertale/Fallen Down.mid": {
+ "jogos/Toby Fox/Undertale/Undertale - Fallen Down.mid": {
   "autor": "Toby Fox",
-  "artista": "Undertale",
+  "artista": "Toby Fox",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Toby Fox; sequenciada por Mrshadowcat no VGMusic",
   "transcricao": "sequenciada por Mrshadowcat no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/computer/microsoft/windows/Undertale-Toriels_Theme.mid",
   "aproveitamento": 93,
   "aproveitamento6": 98
  },
- "jogos/Top Gun (NES)/Abertura.mid": {
+ "jogos/Konami/Top Gun/Top Gun (NES) - abertura.mid": {
   "autor": "Konami",
-  "artista": "Top Gun (NES)",
+  "artista": "Konami",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Konami; sequenciada por Lewis \"XERO\" Thomas no VGMusic",
   "transcricao": "sequenciada por Lewis \"XERO\" Thomas no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/TopGun-demo.mid",
   "aproveitamento": 93,
   "aproveitamento6": 100
  },
- "jogos/Top Gun (NES)/Reabastecimento.mid": {
+ "jogos/Konami/Top Gun/Top Gun (NES) - reabastecimento.mid": {
   "autor": "Konami",
-  "artista": "Top Gun (NES)",
+  "artista": "Konami",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Konami; sequenciada por autor não identificado no VGMusic",
   "transcricao": "sequenciada por autor não identificado no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/Top_Gun_-_Fuel_Plane.mid",
   "aproveitamento": 99,
   "aproveitamento6": 100
  },
- "jogos/Super Mario Bros/Tema principal.mid": {
+ "jogos/Nintendo/Mario/Super Mario Bros. - tema principal.mid": {
   "autor": "Koji Kondo",
-  "artista": "Super Mario Bros.",
+  "artista": "Koji Kondo",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Koji Kondo; sequenciada por autor não identificado no VGMusic",
   "transcricao": "sequenciada por autor não identificado no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/mariotheme.mid",
   "aproveitamento": 92,
   "aproveitamento6": 100
  },
- "jogos/Super Mario Bros/Subterrâneo.mid": {
+ "jogos/Nintendo/Mario/Super Mario Bros. - subterrâneo.mid": {
   "autor": "Koji Kondo",
-  "artista": "Super Mario Bros.",
+  "artista": "Koji Kondo",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Koji Kondo; sequenciada por matOO no VGMusic",
   "transcricao": "sequenciada por matOO no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/Underworld4.mid",
   "aproveitamento": 80,
   "aproveitamento6": 100
  },
- "jogos/The Legend of Zelda/Tema principal.mid": {
+ "jogos/Nintendo/Mario/Super Mario 64 - Bob-omb Battlefield.mid": {
   "autor": "Koji Kondo",
-  "artista": "The Legend of Zelda",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Koji Kondo; sequenciada por PJ Barnes no VGMusic",
-  "transcricao": "sequenciada por PJ Barnes no VGMusic",
-  "estilo": "jogos",
-  "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/z1title.mid",
-  "aproveitamento": 99,
-  "aproveitamento6": 100
- },
- "jogos/Tetris/Tipo A (Korobeiniki).mid": {
-  "autor": "tradicional russo, arranjo de Hirokazu Tanaka",
-  "artista": "Tetris",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de tradicional russo, arranjo de Hirokazu Tanaka; sequenciada por Joanna no VGMusic",
-  "transcricao": "sequenciada por Joanna no VGMusic",
-  "estilo": "jogos",
-  "fonte": "https://www.vgmusic.com/music/console/nintendo/gameboy/tetris-music_a_11.mid",
-  "aproveitamento": 98,
-  "aproveitamento6": 78
- },
- "jogos/Pokémon Red e Blue/Abertura.mid": {
-  "autor": "Junichi Masuda",
-  "artista": "Pokémon Red e Blue",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Junichi Masuda; sequenciada por Joo *Johnnyz* Buaes no VGMusic",
-  "transcricao": "sequenciada por Joo *Johnnyz* Buaes no VGMusic",
-  "estilo": "jogos",
-  "fonte": "https://www.vgmusic.com/music/console/nintendo/gameboy/PkmRB-Title.mid",
-  "aproveitamento": 96,
-  "aproveitamento6": 100
- },
- "jogos/Pokémon Red e Blue/Batalha.mid": {
-  "autor": "Junichi Masuda",
-  "artista": "Pokémon Red e Blue",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Junichi Masuda; sequenciada por Joo *Johnnyz* Buaes no VGMusic",
-  "transcricao": "sequenciada por Joo *Johnnyz* Buaes no VGMusic",
-  "estilo": "jogos",
-  "fonte": "https://www.vgmusic.com/music/console/nintendo/gameboy/PkmRB-Battle2.mid",
-  "aproveitamento": 98,
-  "aproveitamento6": 100
- },
- "jogos/Mega Man 2/Dr. Wily, fase 1.mid": {
-  "autor": "Takashi Tateishi",
-  "artista": "Mega Man 2",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Takashi Tateishi; sequenciada por Jace no VGMusic",
-  "transcricao": "sequenciada por Jace no VGMusic",
-  "estilo": "jogos",
-  "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/MM2_-_DrWilyXG.mid",
-  "aproveitamento": 98,
-  "aproveitamento6": 86
- },
- "jogos/Castlevania/Vampire Killer.mid": {
-  "autor": "Kinuyo Yamashita",
-  "artista": "Castlevania",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Kinuyo Yamashita; sequenciada por Michael Martin no VGMusic",
-  "transcricao": "sequenciada por Michael Martin no VGMusic",
-  "estilo": "jogos",
-  "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/Castlevania_Vampire_Killer.mid",
-  "aproveitamento": 90,
-  "aproveitamento6": 100
- },
- "jogos/Contra/Selva.mid": {
-  "autor": "Kazuki Muraoka",
-  "artista": "Contra",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Kazuki Muraoka; sequenciada por Anthony Bellissimo no VGMusic",
-  "transcricao": "sequenciada por Anthony Bellissimo no VGMusic",
-  "estilo": "jogos",
-  "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/contra-1.mid",
-  "aproveitamento": 89,
-  "aproveitamento6": 100
- },
- "jogos/Sonic the Hedgehog/Green Hill Zone.mid": {
-  "autor": "Masato Nakamura",
-  "artista": "Sonic the Hedgehog",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Masato Nakamura; sequenciada por Jarel Jones no VGMusic",
-  "transcricao": "sequenciada por Jarel Jones no VGMusic",
-  "estilo": "jogos",
-  "fonte": "https://www.vgmusic.com/music/console/sega/genesis/GreenHill.mid",
-  "aproveitamento": 92,
-  "aproveitamento6": 89
- },
- "jogos/Street Fighter II/Tema do Guile.mid": {
-  "autor": "Yoko Shimomura",
-  "artista": "Street Fighter II",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Yoko Shimomura; sequenciada por Moccy no VGMusic",
-  "transcricao": "sequenciada por Moccy no VGMusic",
-  "estilo": "jogos",
-  "fonte": "https://www.vgmusic.com/music/console/nintendo/snes/street_fighter_2_-_guile_stage.mid",
-  "aproveitamento": 100,
-  "aproveitamento6": 100
- },
- "jogos/Super Mario 64/Bob-omb Battlefield.mid": {
-  "autor": "Koji Kondo",
-  "artista": "Super Mario 64",
+  "artista": "Koji Kondo",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Koji Kondo; sequenciada por Paper_Luigi no VGMusic",
   "transcricao": "sequenciada por Paper_Luigi no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/console/nintendo/n64/m64main.mid",
   "aproveitamento": 80,
   "aproveitamento6": 83
  },
- "jogos/Final Fantasy VII/Batalha.mid": {
+ "jogos/Nintendo/Zelda/The Legend of Zelda - tema principal.mid": {
+  "autor": "Koji Kondo",
+  "artista": "Koji Kondo",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Koji Kondo; sequenciada por PJ Barnes no VGMusic",
+  "transcricao": "sequenciada por PJ Barnes no VGMusic",
+  "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/z1title.mid",
+  "aproveitamento": 99,
+  "aproveitamento6": 100
+ },
+ "jogos/Nintendo/Tetris/Tetris - tipo A (Korobeiniki).mid": {
+  "autor": "tradicional russo, arranjo de Hirokazu Tanaka",
+  "artista": "tradicional russo, arranjo de Hirokazu Tanaka",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de tradicional russo, arranjo de Hirokazu Tanaka; sequenciada por Joanna no VGMusic",
+  "transcricao": "sequenciada por Joanna no VGMusic",
+  "categorias": [
+   "jogos",
+   "clássicas"
+  ],
+  "fonte": "https://www.vgmusic.com/music/console/nintendo/gameboy/tetris-music_a_11.mid",
+  "aproveitamento": 98,
+  "aproveitamento6": 78
+ },
+ "jogos/Nintendo/Pokémon/Pokémon Red e Blue - abertura.mid": {
+  "autor": "Junichi Masuda",
+  "artista": "Junichi Masuda",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Junichi Masuda; sequenciada por Joo *Johnnyz* Buaes no VGMusic",
+  "transcricao": "sequenciada por Joo *Johnnyz* Buaes no VGMusic",
+  "fonte": "https://www.vgmusic.com/music/console/nintendo/gameboy/PkmRB-Title.mid",
+  "aproveitamento": 96,
+  "aproveitamento6": 100
+ },
+ "jogos/Nintendo/Pokémon/Pokémon Red e Blue - batalha.mid": {
+  "autor": "Junichi Masuda",
+  "artista": "Junichi Masuda",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Junichi Masuda; sequenciada por Joo *Johnnyz* Buaes no VGMusic",
+  "transcricao": "sequenciada por Joo *Johnnyz* Buaes no VGMusic",
+  "fonte": "https://www.vgmusic.com/music/console/nintendo/gameboy/PkmRB-Battle2.mid",
+  "aproveitamento": 98,
+  "aproveitamento6": 100
+ },
+ "jogos/Capcom/Mega Man/Mega Man 2 - Dr. Wily, fase 1.mid": {
+  "autor": "Takashi Tateishi",
+  "artista": "Takashi Tateishi",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Takashi Tateishi; sequenciada por Jace no VGMusic",
+  "transcricao": "sequenciada por Jace no VGMusic",
+  "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/MM2_-_DrWilyXG.mid",
+  "aproveitamento": 98,
+  "aproveitamento6": 86
+ },
+ "jogos/Konami/Castlevania/Castlevania - Vampire Killer.mid": {
+  "autor": "Kinuyo Yamashita",
+  "artista": "Kinuyo Yamashita",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Kinuyo Yamashita; sequenciada por Michael Martin no VGMusic",
+  "transcricao": "sequenciada por Michael Martin no VGMusic",
+  "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/Castlevania_Vampire_Killer.mid",
+  "aproveitamento": 90,
+  "aproveitamento6": 100
+ },
+ "jogos/Konami/Contra/Contra - fase da selva.mid": {
+  "autor": "Kazuki Muraoka",
+  "artista": "Kazuki Muraoka",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Kazuki Muraoka; sequenciada por Anthony Bellissimo no VGMusic",
+  "transcricao": "sequenciada por Anthony Bellissimo no VGMusic",
+  "fonte": "https://www.vgmusic.com/music/console/nintendo/nes/contra-1.mid",
+  "aproveitamento": 89,
+  "aproveitamento6": 100
+ },
+ "jogos/Sega/Sonic/Sonic the Hedgehog - Green Hill Zone.mid": {
+  "autor": "Masato Nakamura",
+  "artista": "Masato Nakamura",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Masato Nakamura; sequenciada por Jarel Jones no VGMusic",
+  "transcricao": "sequenciada por Jarel Jones no VGMusic",
+  "fonte": "https://www.vgmusic.com/music/console/sega/genesis/GreenHill.mid",
+  "aproveitamento": 92,
+  "aproveitamento6": 89
+ },
+ "jogos/Capcom/Street Fighter/Street Fighter II - tema do Guile.mid": {
+  "autor": "Yoko Shimomura",
+  "artista": "Yoko Shimomura",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Yoko Shimomura; sequenciada por Moccy no VGMusic",
+  "transcricao": "sequenciada por Moccy no VGMusic",
+  "fonte": "https://www.vgmusic.com/music/console/nintendo/snes/street_fighter_2_-_guile_stage.mid",
+  "aproveitamento": 100,
+  "aproveitamento6": 100
+ },
+ "jogos/Square/Final Fantasy/Final Fantasy VII - batalha.mid": {
   "autor": "Nobuo Uematsu",
-  "artista": "Final Fantasy VII",
+  "artista": "Nobuo Uematsu",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Nobuo Uematsu; sequenciada por James Jeans no VGMusic",
   "transcricao": "sequenciada por James Jeans no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/console/sony/ps1/FFVII_Fight.mid",
   "aproveitamento": 96,
   "aproveitamento6": 79
  },
- "jogos/Chrono Trigger/Tema principal.mid": {
+ "jogos/Square/Chrono Trigger/Chrono Trigger - tema principal.mid": {
   "autor": "Yasunori Mitsuda",
-  "artista": "Chrono Trigger",
+  "artista": "Yasunori Mitsuda",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Yasunori Mitsuda; sequenciada por Joe Bickley no VGMusic",
   "transcricao": "sequenciada por Joe Bickley no VGMusic",
-  "estilo": "jogos",
   "fonte": "https://www.vgmusic.com/music/console/nintendo/snes/Chrono_Trigger.mid",
   "aproveitamento": 93,
   "aproveitamento6": 89
  },
- "jogos/Minecraft/Sweden.mid": {
+ "jogos/Mojang/Minecraft/Minecraft - Sweden.mid": {
   "autor": "C418",
-  "artista": "Minecraft",
+  "artista": "C418",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de C418; partitura de FerretFire no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de FerretFire no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "jogos",
   "fonte": "https://musescore.com/user/33597776/scores/5878674",
   "aproveitamento": 77,
   "aproveitamento6": 100
  },
- "desenhos e animes/Gravity Falls/Abertura.mid": {
+ "filmes e séries/Desenhos e animes/Gravity Falls - abertura.mid": {
   "autor": "Brad Breeck",
-  "artista": "Gravity Falls",
+  "artista": "Brad Breeck",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Brad Breeck; partitura de 2_samuel no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de 2_samuel no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "desenhos e animes",
   "fonte": "https://musescore.com/user/33712949/scores/5889816",
   "aproveitamento": 98,
   "aproveitamento6": 73
  },
- "desenhos e animes/Pokémon/Abertura.mid": {
+ "filmes e séries/Desenhos e animes/Pokémon (anime) - abertura.mid": {
   "autor": "John Siegler e John Loeffler",
-  "artista": "Pokémon",
+  "artista": "John Siegler e John Loeffler",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de John Siegler e John Loeffler; partitura de DU FLUFF no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de DU FLUFF no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "desenhos e animes",
   "fonte": "https://musescore.com/du-fluff/scores/3960991",
   "aproveitamento": 90,
   "aproveitamento6": 81
  },
- "desenhos e animes/Os Cavaleiros do Zodíaco/Pegasus Fantasy.mid": {
+ "filmes e séries/Desenhos e animes/Os Cavaleiros do Zodíaco - Pegasus Fantasy (abertura).mid": {
   "autor": "Make-Up (Hiroaki Matsuzawa)",
-  "artista": "Os Cavaleiros do Zodíaco",
+  "artista": "Make-Up (Hiroaki Matsuzawa)",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Make-Up (Hiroaki Matsuzawa); partitura de Wilver Villacinda no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de Wilver Villacinda no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "desenhos e animes",
   "fonte": "https://musescore.com/user/2120151/scores/5058265",
   "aproveitamento": 97,
   "aproveitamento6": 100
  },
- "desenhos e animes/Os Simpsons/Abertura.mid": {
+ "filmes e séries/Desenhos e animes/Os Simpsons - abertura.mid": {
   "autor": "Danny Elfman",
-  "artista": "Os Simpsons",
+  "artista": "Danny Elfman",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Danny Elfman; partitura de Theazerty no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de Theazerty no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "desenhos e animes",
   "fonte": "https://musescore.com/user/32079506/scores/5693955",
   "aproveitamento": 87,
   "aproveitamento6": 100
  },
- "desenhos e animes/A Pantera Cor-de-Rosa/Tema.mid": {
+ "filmes e séries/Desenhos e animes/A Pantera Cor-de-Rosa - tema.mid": {
   "autor": "Henry Mancini",
-  "artista": "A Pantera Cor-de-Rosa",
+  "artista": "Henry Mancini",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Henry Mancini; partitura de Ms Weinert no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de Ms Weinert no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "desenhos e animes",
   "fonte": "https://musescore.com/user/5044676/scores/5847760",
   "aproveitamento": 56,
   "aproveitamento6": 79
  },
- "filmes e séries/Missão- Impossível/Tema.mid": {
+ "filmes e séries/Desenhos e animes/A Pequena Sereia - Kiss the Girl.mid": {
+  "autor": "Alan Menken e Howard Ashman",
+  "artista": "Alan Menken e Howard Ashman",
+  "licenca": "obra protegida · uso educacional sem fins lucrativos",
+  "credito": "composição de Alan Menken e Howard Ashman; transcrição MIDI de autor não identificado, publicada em www.midiworld.com",
+  "transcricao": "autor não identificado · www.midiworld.com",
+  "fonte": "https://www.midiworld.com/download/4039",
+  "nivel": "para fãs",
+  "vocal": "sim",
+  "aproveitamento": 80,
+  "aproveitamento6": 97
+ },
+ "filmes e séries/Filmes/Missão Impossível - tema.mid": {
   "autor": "Lalo Schifrin",
-  "artista": "Missão: Impossível",
+  "artista": "Lalo Schifrin",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Lalo Schifrin; partitura de Sim Andry no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de Sim Andry no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "filmes e séries",
   "fonte": "https://musescore.com/yamatorchestra/scores/4183841",
   "aproveitamento": 84,
   "aproveitamento6": 98
  },
- "filmes e séries/Piratas do Caribe/He's a Pirate.mid": {
+ "filmes e séries/Filmes/Piratas do Caribe - He's a Pirate.mid": {
   "autor": "Klaus Badelt e Hans Zimmer",
-  "artista": "Piratas do Caribe",
+  "artista": "Klaus Badelt e Hans Zimmer",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Klaus Badelt e Hans Zimmer; partitura de Graemond no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de Graemond no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "filmes e séries",
   "fonte": "https://musescore.com/user/94091/scores/1817046",
   "aproveitamento": 89,
   "aproveitamento6": 100
  },
- "filmes e séries/Jurassic Park/Tema.mid": {
+ "filmes e séries/Filmes/Jurassic Park - tema.mid": {
   "autor": "John Williams",
-  "artista": "Jurassic Park",
+  "artista": "John Williams",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de John Williams; partitura de dandalf no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de dandalf no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "filmes e séries",
   "fonte": "https://musescore.com/user/14452796/scores/5976244",
   "aproveitamento": 93,
   "aproveitamento6": 100
  },
- "filmes e séries/Star Wars/Tema principal.mid": {
+ "filmes e séries/Filmes/Star Wars - tema principal.mid": {
   "autor": "John Williams",
-  "artista": "Star Wars",
+  "artista": "John Williams",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de John Williams; partitura de Merigniespiano no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de Merigniespiano no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "filmes e séries",
   "fonte": "https://musescore.com/user/1509386/scores/5943300",
   "aproveitamento": 88,
   "aproveitamento6": 100
  },
- "filmes e séries/Game of Thrones/Abertura.mid": {
-  "autor": "Ramin Djawadi",
-  "artista": "Game of Thrones",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Ramin Djawadi; partitura de killian_felix no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "transcricao": "partitura de killian_felix no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "filmes e séries",
-  "fonte": "https://musescore.com/user/18030386/scores/4981721",
-  "aproveitamento": 100,
-  "aproveitamento6": 100
- },
- "filmes e séries/Rocky/Gonna Fly Now.mid": {
+ "filmes e séries/Filmes/Rocky - Gonna Fly Now.mid": {
   "autor": "Bill Conti",
-  "artista": "Rocky",
+  "artista": "Bill Conti",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Bill Conti; partitura de carlosenseniat@yahoo.com.ar no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de carlosenseniat@yahoo.com.ar no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "filmes e séries",
   "fonte": "https://musescore.com/user/2668131/scores/4843991",
   "aproveitamento": 96,
   "aproveitamento6": 65
  },
- "filmes e séries/Os Caça-Fantasmas/Ghostbusters.mid": {
+ "filmes e séries/Filmes/Os Caça-Fantasmas - Ghostbusters.mid": {
   "autor": "Ray Parker Jr.",
-  "artista": "Os Caça-Fantasmas",
+  "artista": "Ray Parker Jr.",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Ray Parker Jr.; partitura de julian Cimer no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de julian Cimer no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "filmes e séries",
   "fonte": "https://musescore.com/user/26695201/scores/4812548",
   "aproveitamento": 81,
   "aproveitamento6": 94
  },
- "filmes e séries/Um Tira da Pesada/Axel F.mid": {
+ "filmes e séries/Filmes/Um Tira da Pesada - Axel F.mid": {
   "autor": "Harold Faltermeyer",
-  "artista": "Um Tira da Pesada",
+  "artista": "Harold Faltermeyer",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Harold Faltermeyer; partitura de Fluorineer no MuseScore (edição domínio público); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de Fluorineer no MuseScore (edição domínio público); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "filmes e séries",
   "fonte": "https://musescore.com/user/993251/scores/470396",
   "aproveitamento": 72,
   "aproveitamento6": 89
  },
- "filmes e séries/Arquivo X/Abertura.mid": {
-  "autor": "Mark Snow",
-  "artista": "Arquivo X",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Mark Snow; sequenciada por autor não identificado, publicada em rawl.rocks",
-  "transcricao": "sequenciada por autor não identificado, publicada em rawl.rocks",
-  "estilo": "filmes e séries",
-  "fonte": "https://rawl.rocks/lakh-data/Television%20Theme%20Songs/X-Files.mid",
-  "aproveitamento": 61,
-  "aproveitamento6": 76
- },
- "filmes e séries/Miami Vice/Tema.mid": {
-  "autor": "Jan Hammer",
-  "artista": "Miami Vice",
-  "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Jan Hammer; sequenciada por autor não identificado, publicada em rawl.rocks",
-  "transcricao": "sequenciada por autor não identificado, publicada em rawl.rocks",
-  "estilo": "filmes e séries",
-  "fonte": "https://rawl.rocks/lakh-data/Jan%20Hammer/Miami%20Vice%20Theme.mid",
-  "aproveitamento": 49,
-  "aproveitamento6": 75
- },
- "filmes e séries/1492- A Conquista do Paraíso/Conquest of Paradise.mid": {
+ "filmes e séries/Filmes/1492, A Conquista do Paraíso - Conquest of Paradise.mid": {
   "autor": "Vangelis",
-  "artista": "1492: A Conquista do Paraíso",
+  "artista": "Vangelis",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Vangelis; sequenciada por autor não identificado, publicada em rawl.rocks",
   "transcricao": "sequenciada por autor não identificado, publicada em rawl.rocks",
-  "estilo": "filmes e séries",
   "fonte": "https://rawl.rocks/lakh-data/Vangelis/1492%3A%20Conquest%20of%20Paradise.2.mid",
   "aproveitamento": 91,
   "aproveitamento6": 50
  },
- "filmes e séries/O Poderoso Chefão/Tema.mid": {
+ "filmes e séries/Filmes/O Poderoso Chefão - tema.mid": {
   "autor": "Nino Rota",
-  "artista": "O Poderoso Chefão",
+  "artista": "Nino Rota",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Nino Rota; partitura de TavyMusic no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
   "transcricao": "partitura de TavyMusic no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "filmes e séries",
   "fonte": "https://musescore.com/user/80753/scores/130479",
   "aproveitamento": 78,
   "aproveitamento6": 95
  },
- "Brasil/Hino Nacional Brasileiro/Hino Nacional.mid": {
-  "autor": "Francisco Manuel da Silva e Osório Duque-Estrada",
-  "artista": "Hino Nacional Brasileiro",
+ "filmes e séries/Filmes/O Mágico de Oz - Over the Rainbow.mid": {
+  "autor": "Harold Arlen e Yip Harburg",
+  "artista": "Harold Arlen e Yip Harburg",
+  "licenca": "obra protegida · uso educacional sem fins lucrativos",
+  "credito": "composição de Harold Arlen e Yip Harburg; transcrição MIDI de autor não identificado, publicada em www.midiworld.com",
+  "transcricao": "autor não identificado · www.midiworld.com",
+  "fonte": "https://www.midiworld.com/download/3867",
+  "nivel": "para fãs",
+  "vocal": "nao",
+  "aproveitamento": 60,
+  "aproveitamento6": 73
+ },
+ "filmes e séries/Séries e TV/Game of Thrones - abertura.mid": {
+  "autor": "Ramin Djawadi",
+  "artista": "Ramin Djawadi",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Francisco Manuel da Silva e Osório Duque-Estrada; partitura de Bielsaar no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "transcricao": "partitura de Bielsaar no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "Brasil",
-  "fonte": "https://musescore.com/user/1318256/scores/2578901",
-  "aproveitamento": 95,
+  "credito": "composição de Ramin Djawadi; partitura de killian_felix no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de killian_felix no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/18030386/scores/4981721",
+  "aproveitamento": 100,
   "aproveitamento6": 100
  },
- "Brasil/Brasileirinho/Brasileirinho.mid": {
-  "autor": "Waldir Azevedo",
-  "artista": "Brasileirinho",
+ "filmes e séries/Séries e TV/Arquivo X - abertura.mid": {
+  "autor": "Mark Snow",
+  "artista": "Mark Snow",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
-  "credito": "composição de Waldir Azevedo; partitura de udop no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "transcricao": "partitura de udop no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
-  "estilo": "Brasil",
-  "fonte": "https://musescore.com/user/189045/scores/179846",
-  "aproveitamento": 96,
-  "aproveitamento6": 84
+  "credito": "composição de Mark Snow; sequenciada por autor não identificado, publicada em rawl.rocks",
+  "transcricao": "sequenciada por autor não identificado, publicada em rawl.rocks",
+  "fonte": "https://rawl.rocks/lakh-data/Television%20Theme%20Songs/X-Files.mid",
+  "aproveitamento": 61,
+  "aproveitamento6": 76
  },
- "Brasil/Fórmula 1/Tema da Vitória (Ayrton Senna).mid": {
+ "filmes e séries/Séries e TV/Miami Vice - tema.mid": {
+  "autor": "Jan Hammer",
+  "artista": "Jan Hammer",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Jan Hammer; sequenciada por autor não identificado, publicada em rawl.rocks",
+  "transcricao": "sequenciada por autor não identificado, publicada em rawl.rocks",
+  "fonte": "https://rawl.rocks/lakh-data/Jan%20Hammer/Miami%20Vice%20Theme.mid",
+  "aproveitamento": 49,
+  "aproveitamento6": 75
+ },
+ "filmes e séries/Séries e TV/Fórmula 1 - Tema da Vitória (Ayrton Senna).mid": {
   "autor": "Eduardo Souto Neto",
-  "artista": "Fórmula 1",
+  "artista": "Eduardo Souto Neto",
   "licenca": "obra protegida — uso educacional sem fins lucrativos",
   "credito": "composição de Eduardo Souto Neto; transcrição MIDI de autor não identificado, publicada no BitMidi",
   "transcricao": "autor não identificado, publicada no BitMidi",
-  "estilo": "Brasil",
   "fonte": "https://bitmidi.com/senna-mid",
   "aproveitamento": 78,
   "aproveitamento6": 70
+ },
+ "jogos/Nintendo/Zelda/The Legend of Zelda- Ocarina of Time - Gerudo Valley.mid": {
+  "autor": "Koji Kondo",
+  "artista": "Koji Kondo",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Koji Kondo; sequenciada por Mary no VGMusic",
+  "transcricao": "sequenciada por Mary no VGMusic",
+  "fonte": "https://www.vgmusic.com/music/console/nintendo/n64/z5gerudo33.mid",
+  "aproveitamento": 83,
+  "aproveitamento6": 65
+ },
+ "jogos/CD Projekt/The Witcher/The Witcher 3 - Blood and Wine.mid": {
+  "autor": "Marcin Przybyłowicz",
+  "artista": "Marcin Przybyłowicz",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Marcin Przybyłowicz; partitura de Pesetti no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de Pesetti no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/3945001/scores/5302518",
+  "aproveitamento": 69,
+  "aproveitamento6": 81
+ },
+ "jogos/Bethesda/The Elder Scrolls/Skyrim - Dragonborn (tema principal).mid": {
+  "autor": "Jeremy Soule",
+  "artista": "Jeremy Soule",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Jeremy Soule; partitura de RIsthfon no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de RIsthfon no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/359886/scores/1044196",
+  "aproveitamento": 94,
+  "aproveitamento6": 82
+ },
+ "jogos/Firaxis/Civilization/Civilization IV - Baba Yetu.mid": {
+  "autor": "Christopher Tin",
+  "artista": "Christopher Tin",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Christopher Tin; partitura de ThorinDelver no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de ThorinDelver no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/23105806/scores/5923163",
+  "aproveitamento": 93,
+  "aproveitamento6": 72
+ },
+ "filmes e séries/Desenhos e animes/Cowboy Bebop - Tank! (abertura).mid": {
+  "autor": "Yoko Kanno",
+  "artista": "Yoko Kanno",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Yoko Kanno; partitura de OmbraDiRoma no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de OmbraDiRoma no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/3944161/scores/5219881",
+  "aproveitamento": 90,
+  "aproveitamento6": 99
+ },
+ "filmes e séries/Desenhos e animes/Cowboy Bebop - Too Good Too Bad.mid": {
+  "autor": "Yoko Kanno",
+  "artista": "Yoko Kanno",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Yoko Kanno; partitura de Patrock22 no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de Patrock22 no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/27889701/scores/5055695",
+  "aproveitamento": 83,
+  "aproveitamento6": 100
+ },
+ "filmes e séries/Desenhos e animes/Cowboy Bebop - The Real Folk Blues (encerramento).mid": {
+  "autor": "Yoko Kanno",
+  "artista": "Yoko Kanno",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Yoko Kanno; partitura de ArthurHBraga no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de ArthurHBraga no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/arthur_braga/scores/6358465",
+  "aproveitamento": 63,
+  "aproveitamento6": 75
+ },
+ "filmes e séries/Desenhos e animes/Lupin III - tema.mid": {
+  "autor": "Yuji Ohno",
+  "artista": "Yuji Ohno",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Yuji Ohno; partitura de csithiphong1233 no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de csithiphong1233 no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/29728783/scores/5244667",
+  "aproveitamento": 89,
+  "aproveitamento6": 100
+ },
+ "filmes e séries/Desenhos e animes/Princesa Mononoke - The Legend of Ashitaka.mid": {
+  "autor": "Joe Hisaishi",
+  "artista": "Joe Hisaishi",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Joe Hisaishi; partitura de fallingstar no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de fallingstar no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/3215601/scores/5840908",
+  "aproveitamento": 94,
+  "aproveitamento6": 100
+ },
+ "filmes e séries/Desenhos e animes/Initial D - Running in the 90s.mid": {
+  "autor": "Max Coveri",
+  "artista": "Max Coveri",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Max Coveri; partitura de Dylan Paul no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de Dylan Paul no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/12681946/scores/4219526",
+  "aproveitamento": 90,
+  "aproveitamento6": 76
+ },
+ "filmes e séries/Desenhos e animes/Initial D - Deja Vu.mid": {
+  "autor": "Dave Rodgers",
+  "artista": "Dave Rodgers",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Dave Rodgers; partitura de Wryyydwagon no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de Wryyydwagon no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/12562881/scores/5113014",
+  "aproveitamento": 75,
+  "aproveitamento6": 95
+ },
+ "filmes e séries/Séries e TV/The Witcher (série) - Toss a Coin to Your Witcher.mid": {
+  "autor": "Sonya Belousova e Giona Ostinelli",
+  "artista": "Sonya Belousova e Giona Ostinelli",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Sonya Belousova e Giona Ostinelli; partitura de RipHunterIsMyCopilot no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de RipHunterIsMyCopilot no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/33897787/scores/5933398",
+  "aproveitamento": 96,
+  "aproveitamento6": 100
+ },
+ "filmes e séries/Filmes/Interestelar - Day One.mid": {
+  "autor": "Hans Zimmer",
+  "artista": "Hans Zimmer",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Hans Zimmer; partitura de Ith'era no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de Ith'era no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "fonte": "https://musescore.com/user/13353116/scores/5652854",
+  "aproveitamento": 97,
+  "aproveitamento6": 100
+ },
+ "jogos/CD Projekt/The Witcher/The Witcher 3 - Hunt or Be Hunted.mid": {
+  "autor": "Marcin Przybyłowicz",
+  "artista": "Marcin Przybyłowicz",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Marcin Przybyłowicz; transcrição MIDI de autor não identificado, publicada no BitMidi",
+  "transcricao": "autor não identificado, publicada no BitMidi",
+  "fonte": "https://bitmidi.com/the-witcher-3-hunt-or-be-hunted-mid",
+  "aproveitamento": 62,
+  "aproveitamento6": 58
+ },
+ "jogos/CD Projekt/The Witcher/The Witcher 3 - Ladies of the Woods.mid": {
+  "autor": "Marcin Przybyłowicz",
+  "artista": "Marcin Przybyłowicz",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Marcin Przybyłowicz; transcrição MIDI de autor não identificado, publicada no BitMidi",
+  "transcricao": "autor não identificado, publicada no BitMidi",
+  "fonte": "https://bitmidi.com/the-witcher-3-ladies-of-the-woods-mid",
+  "aproveitamento": 64,
+  "aproveitamento6": 61
+ },
+ "jogos/CD Projekt/The Witcher/The Witcher 3 - The Fields of Ard Skellig.mid": {
+  "autor": "Marcin Przybyłowicz e Percival",
+  "artista": "Marcin Przybyłowicz e Percival",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "composição de Marcin Przybyłowicz e Percival; transcrição MIDI de autor não identificado, publicada no BitMidi",
+  "transcricao": "autor não identificado, publicada no BitMidi",
+  "fonte": "https://bitmidi.com/the-witcher-3-the-fields-of-ard-skellig-mid",
+  "aproveitamento": 66,
+  "aproveitamento6": 63
  }
 }

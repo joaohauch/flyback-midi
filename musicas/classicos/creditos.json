@@ -799,5 +799,33 @@
   "regiao": "Rússia e Leste Europeu",
   "aproveitamento": 56,
   "aproveitamento6": 71
+ },
+ "Ilhas Britânicas/Purcell (H.)/Funeral of Queen Mary.mid": {
+  "autor": "Henry Purcell",
+  "artista": "Purcell Henry",
+  "licenca": "obra protegida · uso educacional sem fins lucrativos",
+  "credito": "composição de Purcell Henry; transcrição MIDI de autor não identificado, publicada em www.midiworld.com",
+  "transcricao": "autor não identificado · www.midiworld.com",
+  "fonte": "https://www.midiworld.com/download/4519",
+  "posicao": 1082,
+  "popularidade": "sem medição",
+  "nivel": "para fãs",
+  "vocal": "sim · faixa \"Altos\"",
+  "aproveitamento": 51,
+  "aproveitamento6": 79,
+  "estilo": "Baroque",
+  "regiao": "Ilhas Britânicas"
+ },
+ "Brasil/Silva (F. M. da)/Hino Nacional Brasileiro.mid": {
+  "autor": "Francisco Manuel da Silva",
+  "artista": "Hino Nacional Brasileiro",
+  "licenca": "Domínio público",
+  "credito": "composição de Francisco Manuel da Silva e Osório Duque-Estrada; partitura de Bielsaar no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "transcricao": "partitura de Bielsaar no MuseScore (edição CC0); via PDMX (Long et al., 2024, CC BY 4.0)",
+  "estilo": "Hymn",
+  "fonte": "https://musescore.com/user/1318256/scores/2578901",
+  "aproveitamento": 95,
+  "aproveitamento6": 100,
+  "regiao": "Brasil"
  }
 }

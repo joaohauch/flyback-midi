@@ -71,7 +71,11 @@ h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em;white-space:now
 .transport #zoom{height:36px;font-size:12px}
 /* acervo: três vistas, filtros num menu que só abre quando pedido */
 .lib-topo{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px}
-.vistas button{padding:4px 11px}
+/* sete abas não cabem numa linha no acervo estreito: quebram, e a linha de cada aba é uma sombra
+   à esquerda e em cima, que a borda do grupo corta na primeira coluna e na primeira linha */
+.seg.vistas{display:flex;flex-wrap:wrap;flex:1 1 100%}
+.vistas button{flex:1 0 auto;padding:4px 9px;box-shadow:-1px -1px 0 var(--rule)}
+.seg.vistas button+button{border-left:0}
 .menu{position:relative}
 .pop{position:absolute;z-index:10;top:calc(100% + 4px);left:0;min-width:190px;display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--chrome);border:1px solid var(--rule);border-radius:3px}
 .pop .chk{color:var(--ink)}
@@ -212,6 +216,13 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
 .filtros button[aria-pressed=true]{color:var(--ink)}
 .liblist{list-style:none;margin:0;padding:0}
 .liblist li.grp{font-size:11.5px;color:var(--dim);padding:8px 0 3px;font-family:"IBM Plex Mono",monospace}
+.liblist li.mus{display:flex;align-items:stretch;border-bottom:1px solid var(--soft)}
+.liblist li.mus>button[data-path]{border-bottom:0}
+/* estrela das favoritas: vazia e apagada até marcar; marcada, no amarelo do flyback 1 */
+.liblist button.fav{flex:none;width:28px;justify-content:center;align-items:center;padding:0;font-size:15px;color:var(--rule)}
+.liblist button.fav:hover,.liblist button.fav:focus-visible{color:var(--dim)}
+.liblist button.fav[aria-pressed=true]{color:var(--c1)}
+#libFav[aria-pressed=true]{color:var(--c1);border-color:var(--c1)}
 .liblist button{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--soft);border-radius:0;background:transparent;padding:6px 4px}
 .liblist button[aria-current=true]{background:var(--panel)}
 .liblist .t{flex:1;min-width:0;overflow-wrap:anywhere}
@@ -256,6 +267,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
   .seg button{min-height:36px;padding:0 12px}
   select,input[type=search]{font-size:16px;min-height:36px}
   .liblist button{padding:10px 4px}
+  .liblist button.fav{width:38px}
 }
 </style>
 </head>
@@ -276,6 +288,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
             <button id="libRnd">sortear uma</button>
           </div>
         </div>
+        <button id="libFav" aria-pressed="false" title="mostrar só as músicas marcadas com estrela (ficam guardadas neste navegador)">☆ favoritas</button>
         <button id="baixarMus" title="buscar no YouTube e transcrever na sua GPU ou no Mirelo">Baixar músicas…</button>
       </div>
       <div class="lib-linha hide" id="libTools">
@@ -1061,6 +1074,10 @@ const ENVELOPES = {
   corda:      { tau: .9,  sus: 0 },
 };
 const ATAQUE = .004;
+/* força da nota, 0 a 1: a velocity do MIDI vira amplitude inicial, e a curva deixa o pianissimo
+   audível. A mesma conta vai para o ESP no "N c t f a" (a = força em ‰), para o arco e o
+   computador soarem iguais. */
+const forca = (s, usaVel) => usaVel ? .25 + .75 * Math.pow(Math.min(127, s.v || 96) / 127, 1.4) : 1;
 function scheduleVoice(c, dest, segs, at, t0, vol, env, usaVel){
   const osc = c.createOscillator(); osc.type = 'square';
   const gn = c.createGain(); gn.gain.value = 0;
@@ -1069,8 +1086,7 @@ function scheduleVoice(c, dest, segs, at, t0, vol, env, usaVel){
   for (const s of segs){
     if (s.end <= at) continue;
     const a = t0 + Math.max(0, s.start - at), b = t0 + (s.end - at);
-    /* a velocity do MIDI vira amplitude inicial; a curva deixa o pianissimo audivel */
-    const pico = vol * (usaVel ? .25 + .75 * Math.pow(Math.min(127, s.v || 96) / 127, 1.4) : 1);
+    const pico = vol * forca(s, usaVel);
     osc.frequency.setValueAtTime(s.f, a);
     if (b - a < .012){ gn.gain.setValueAtTime(pico, a); gn.gain.setValueAtTime(0, b); continue; }
     gn.gain.setValueAtTime(0, a);
@@ -2453,25 +2469,54 @@ const APROV_MIN = 58;
 const APROV6_MIN = 62;
 const cabe2 = it => (it.aproveitamento || 0) >= APROV_MIN;
 const cabe6 = it => cabe2(it) || (it.aproveitamento6 || 0) >= APROV6_MIN;
-/* Acervo em três vistas — tudo, antigas, transcritas — no lugar de um botão por pasta: o dono do
-   projeto achou o menu poluído, e a pergunta que importa é se a música foi transcrita por uma
-   pessoa (antiga, de 8 a 16 faixas) ou pela IA (uma faixa por instrumento). Dentro da vista,
-   um seletor de artista ou grupo, um de gênero e a busca; os filtros ficam num menu que só abre
-   quando pedido. "Meus" aparece só para quem guardou arquivos neste navegador. */
-const VISTAS = [['', 'tudo'], ['antigas', 'antigas'], ['temas', 'temas'], ['transcritas', 'transcritas'], ['meus', 'meus']];
+/* Acervo por categoria — clássicas, jogos, filmes e séries, rock, pop, transcritas —, no lugar de
+   "antigas" e "temas", que separavam pela origem do arquivo e não pelo que a música é (pedido do
+   dono do projeto, nov/2026). A categoria vem do índice (gerar_acervo.py: `categorias`), e uma
+   música pode estar em mais de uma: o Tetris é jogo e é folclore russo. Dentro da vista, um
+   seletor de grupo com a hierarquia (Nintendo › Mario, Queen, Alemanha e Áustria › Bach), um de
+   gênero e a busca; os filtros ficam num menu que só abre quando pedido. "Meus" aparece só para
+   quem guardou arquivos neste navegador. */
+const VISTAS = [['', 'tudo'], ['clássicas', 'clássicas'], ['jogos', 'jogos'], ['filmes e séries', 'filmes e séries'],
+  ['rock', 'rock'], ['pop', 'pop'], ['transcritas', 'transcritas'], ['meus', 'meus']];
 let vista = '', temMeus = false;
+/* Favoritas (pedido do dono do projeto, nov/2026): a estrela ao lado de cada música marca, o botão
+   "favoritas" mostra só as marcadas, dentro da vista e dos filtros. Ficam neste navegador, pelo
+   caminho do arquivo — renomear ou mover a música no acervo desmarca. */
+const favs = new Set(store.get('favoritas') || []);
+let soFav = store.get('soFav') === true;
+const ehFav = it => favs.has(it.arquivo);
+function marcarFav(it, b){
+  if (favs.has(it.arquivo)) favs.delete(it.arquivo); else favs.add(it.arquivo);
+  store.set('favoritas', [...favs]);
+  if (soFav) renderLib(); else { pintarFav(b, ehFav(it)); botaoFav(); }
+}
+function pintarFav(b, sim){
+  b.textContent = sim ? '★' : '☆';
+  b.setAttribute('aria-pressed', String(sim));
+  b.title = sim ? 'tirar das favoritas' : 'marcar como favorita';
+  b.setAttribute('aria-label', b.title);
+}
+function botaoFav(){
+  const n = lib.reduce((s, it) => s + (ehFav(it) ? 1 : 0), 0);
+  $('libFav').textContent = (soFav ? '★' : '☆') + ' favoritas' + (n ? ' (' + nBR(n) + ')' : '');
+  $('libFav').setAttribute('aria-pressed', String(soFav));
+}
 /* quem transcreveu: MuScriptor na GPU daqui, Mirelo (interface ou API) ou, sem campo, MIDI
    nativo, escrito por uma pessoa. Arquivo aberto do computador não tem como saber. */
 const ORIGEM = { muscriptor: 'MuScriptor', mirelo: 'Mirelo' };
 const origemDe = it => ORIGEM[it.origem] || (it.pasta === PASTA_MEUS ? '' : 'nativo');
 const ehTranscrita = it => it.pasta === 'transcritas' || it.pasta.startsWith('transcritas/');
-/* temas: jogos, desenhos, filmes, Brasil (tools/baixar_temas.py); antigas é o resto do que uma
-   pessoa sequenciou, que não é transcrição nem os meus */
-const ehTema = it => it.pasta === 'temas' || it.pasta.startsWith('temas/');
-const naVista = (it, v = vista) => v === 'transcritas' ? ehTranscrita(it)
+const naVista = (it, v = vista) => !v ? true
   : v === 'meus' ? it.pasta === PASTA_MEUS
-  : v === 'temas' ? ehTema(it)
-  : v === 'antigas' ? !ehTranscrita(it) && !ehTema(it) && it.pasta !== PASTA_MEUS : true;
+  : (it.categorias || []).includes(v);
+/* grupo da música na vista: o da categoria, se ela estiver em mais de uma; em "tudo", com a
+   categoria na frente, porque Nintendo › Mario sozinho não diz que é jogo */
+const catDe = (it, v = vista) => v && (it.categorias || []).includes(v) ? v : (it.categorias || [])[0] || '';
+function grupoDe(it, v = vista){
+  const c = catDe(it, v);
+  const g = (it.grupos && it.grupos[c]) || it.grupo || (ehTranscrita(it) ? artistaDe(it) : '') || it.pasta || '';
+  return v ? g : [c, g].filter(Boolean).join(' › ');
+}
 /* "+ de 2 canais": só soa bem com mais de dois flybacks — cabe em seis e não cabe em dois */
 const precisaMais = it => !cabe2(it) && (it.aproveitamento6 || 0) >= APROV6_MIN;
 const filtro = () => ({ voz: $('fVoz').checked, dois: $('f2').checked, mais: $('fMais').checked, topo: $('fTopo').checked });
@@ -2493,9 +2538,9 @@ function montarAcervos(){
   });
 }
 
-/* Seletor de artista ou grupo. Nas transcritas, o artista do crédito; nas antigas, a pasta mais
-   funda (artista nas bandas, compositor nos clássicos, com a região como cabeçalho). Seletor de
-   gênero ao lado, escondido quando a vista tem menos de dois. */
+/* Seletor de grupo: o último nível da hierarquia como opção, o resto como cabeçalho (Nintendo ›
+   Mario fica "Mario" sob "Nintendo"). Seletor de gênero ao lado, escondido quando a vista tem
+   menos de dois. */
 function montarFiltro(){
   const sel = $('libF'), selG = $('libG');
   const antes = sel.value, antesG = selG.value;
@@ -2503,15 +2548,8 @@ function montarFiltro(){
   const dentro = lib.filter(it => naVista(it));
   const grupos = new Map();
   dentro.forEach(it => {
-    let k, rotulo, acima;
-    if (ehTranscrita(it)){
-      const a = artistaDe(it) || 'sem artista';
-      k = 'a:' + fold(a); rotulo = a; acima = vista === 'transcritas' ? '' : 'transcritas';
-    } else {
-      const corte = it.pasta.lastIndexOf('/');
-      k = 'p:' + it.pasta; rotulo = corte < 0 ? it.pasta : it.pasta.slice(corte + 1);
-      acima = corte < 0 ? '' : it.pasta.slice(0, corte).replace(/\//g, ' › ');
-    }
+    const gr = grupoDe(it), corte = gr.lastIndexOf(' › ');
+    const k = 'g:' + gr, rotulo = corte < 0 ? gr : gr.slice(corte + 3), acima = corte < 0 ? '' : gr.slice(0, corte);
     if (!rotulo) return;
     const g = grupos.get(k) || { rotulo, acima, n: 0 };
     g.n++; grupos.set(k, g);
@@ -2540,8 +2578,8 @@ function filtrar(){
   const ws = fold($('libQ').value.trim()).split(/\s+/).filter(Boolean);
   const g = $('libF').value, gen = $('libG').classList.contains('hide') ? '' : $('libG').value, f = filtro();
   return lib.filter(it => naVista(it)
-    && (!g || (g.startsWith('a:') ? ehTranscrita(it) && fold(artistaDe(it) || 'sem artista') === g.slice(2)
-                                  : it.pasta === g.slice(2) || it.pasta.startsWith(g.slice(2) + '/')))
+    && (!soFav || ehFav(it))
+    && (!g || 'g:' + grupoDe(it) === g)
     && (!gen || estiloDe(it) === gen)
     && (!f.voz || temVoz(it))
     && (!(f.dois || f.mais) || (f.dois && cabe2(it)) || (f.mais && precisaMais(it)))
@@ -2555,30 +2593,32 @@ function renderLib(){
   const f = filtro(), ativos = [f.voz, f.dois, f.mais, f.topo].filter(Boolean).length;
   $('libFiltros').textContent = ativos ? 'Filtros (' + ativos + ')' : 'Filtros';
   $('libFiltros').setAttribute('aria-pressed', String(ativos > 0));
-  let grupo = null;
+  botaoFav();
   filtrados.slice(0, LIMITE).forEach(it => {
-    /* cabeçalho por grupo: a pasta nas antigas, o artista nas transcritas */
-    const cab = ehTranscrita(it) ? 'transcritas › ' + (artistaDe(it) || 'sem artista') : it.pasta.replace(/\//g, ' › ');
-    if (cab !== grupo){ grupo = cab; if (cab) add('grp', cab); }
-    const li = document.createElement('li'), b = document.createElement('button');
+    /* Sem cabeçalho de pasta: a categoria já diz o que é, e cada linha diz o resto — o dono do
+       projeto achou a lista pesada com "bandas › 10cc" em cima de cada grupo. Nos jogos e nos
+       filmes, o grupo (Nintendo › Mario, Filmes); no resto, o gênero. */
+    const li = document.createElement('li'), b = document.createElement('button'), fav = document.createElement('button');
+    li.className = 'mus'; fav.className = 'fav'; pintarFav(fav, ehFav(it)); fav.onclick = () => marcarFav(it, fav);
     const t = document.createElement('span'); t.className = 't'; t.textContent = it.titulo;
-    const sub = [it.instrumentos || artistaDe(it), estiloDe(it)].filter(Boolean).join(' · ');
+    const c = catDe(it), onde = c === 'jogos' || c === 'filmes e séries' ? grupoDe(it, c) : estiloDe(it);
+    const sub = [artistaDe(it), onde].filter(Boolean).join(' · ');
     if (sub){ const s = document.createElement('span'); s.className = 'sub'; s.textContent = sub; t.appendChild(s); }
     const tag = document.createElement('span'); tag.className = 'tag';
     /* origem (nativo, MuScriptor, Mirelo); pronta: tem .json de ajuste; vocal: tem linha de canto */
     tag.textContent = [it.tipo, origemDe(it), it.config ? 'pronta' : '', temVoz(it) ? 'vocal' : ''].filter(Boolean).join(' · ');
     b.append(t, tag); b.dataset.path = it.arquivo; b.onclick = () => openLib(it);
-    li.appendChild(b); ul.appendChild(li);
+    li.append(fav, b); ul.appendChild(li);
   });
   const n = filtrados.length;
-  if (!n && lib.length) add('grp', 'nada encontrado');
+  if (!n && lib.length) add('grp', soFav ? 'nada entre as favoritas — marque músicas na ☆ ao lado de cada uma' : 'nada encontrado');
   else if (n > LIMITE) add('grp', 'mais ' + (n - LIMITE).toLocaleString('pt-BR') + ' — busque pelo nome ou escolha um grupo');
   $('libOff').textContent = n === lib.length ? 'Guardar tudo para usar sem internet' : 'Guardar estas ' + n.toLocaleString('pt-BR') + ' para usar sem internet';
   $('libOff').disabled = !n;
   markLib();
 }
 function markLib(){
-  document.querySelectorAll('#libList button').forEach(b => b.setAttribute('aria-current', !!(current && current.lib && current.lib.arquivo === b.dataset.path)));
+  document.querySelectorAll('#libList button[data-path]').forEach(b => b.setAttribute('aria-current', !!(current && current.lib && current.lib.arquivo === b.dataset.path)));
 }
 /* crédito exigido pelas licenças Creative Commons: aparece junto das faixas */
 function showCredit(it){
@@ -2626,6 +2666,7 @@ async function openLib(it){
 let buscaTimer = 0;
 $('libQ').addEventListener('input', () => { clearTimeout(buscaTimer); buscaTimer = setTimeout(renderLib, 120); });
 $('libF').addEventListener('change', renderLib);
+$('libFav').onclick = () => { soFav = !soFav; store.set('soFav', soFav); renderLib(); };
 $('libG').addEventListener('change', renderLib);
 ['fVoz', 'f2', 'fMais', 'fTopo'].forEach(id => $(id).addEventListener('change', renderLib));
 /* o menu de filtros abre e fecha no botão; clique fora ou Esc fecha */
@@ -2752,7 +2793,7 @@ function serialStart(at){
     if (!soa(i)) return;
     k.segs.forEach((s, j) => {
       if (s.end <= at) return;
-      ev.push({ t: Math.max(s.start, at), c: i, f: s.f });
+      ev.push({ t: Math.max(s.start, at), c: i, f: s.f, a: Math.round(1000 * forca(s, velOf(i))) });
       const nx = k.segs[j + 1];
       if (!nx || nx.start - s.end > .001) ev.push({ t: s.end, c: i, f: 0 });
     });
@@ -2760,6 +2801,7 @@ function serialStart(at){
   ev.sort((a, b) => a.t - b.t);
   ser.q = ev; ser.i = 0; ser.at = at; ser.base = actx.currentTime;
   serialPinos();       /* de novo a cada começo: o ESP pode ter reiniciado ao abrir a porta */
+  for (let c = 0; c < esp.n; c++) serialEnvelope(c, envOf(c));
   serialWrite('R');
   const pump = () => {
     if (!playing || !serialAtivo()) return;
@@ -2768,7 +2810,7 @@ function serialStart(at){
       const e = ser.q[ser.i], tc = startedAt + (e.t - ser.at);
       if (tc > horizon) break;
       const ms = Math.max(0, Math.round((tc - ser.base) * 1000));
-      serialWrite(e.f ? 'N ' + e.c + ' ' + ms + ' ' + e.f.toFixed(2) : 'F ' + e.c + ' ' + ms);
+      serialWrite(e.f ? 'N ' + e.c + ' ' + ms + ' ' + e.f.toFixed(2) + ' ' + e.a : 'F ' + e.c + ' ' + ms);
       ser.i++;
     }
   };
@@ -2782,9 +2824,17 @@ function serialPinos(){
   if (!serialAtivo()) return;
   for (let c = 0; c < MAX; c++) serialWrite('P ' + c + ' ' + (c < esp.n ? esp.pinos[c] : -1));
 }
+/* "E c atk tau sus rel": a receita do envelope do canal, a mesma do áudio (ENVELOPES, ATAQUE e a
+   rampa final de 6 ms). O firmware desenha a curva e a aplica pela fração aberta do arco, como o
+   volume do gerador de tom (docs/protocolo-serial.md). O ganho do mixer não entra: é o volume do
+   computador; o arco vai até o máximo dele. Firmware antigo ignora a linha e a força do "N". */
+function serialEnvelope(c, env){
+  serialWrite('E ' + c + ' ' + Math.round(ATAQUE * 1000) + ' ' + (env ? Math.round(env.tau * 1000) : 0)
+    + ' ' + (env ? Math.round(env.sus * 1000) : 1000) + ' 6');
+}
 function testar(i){
   if (!ser.writer || playing) return;
-  serialPinos(); serialWrite('R'); serialWrite('N ' + i + ' 0 440.00'); serialWrite('F ' + i + ' 600');
+  serialPinos(); serialEnvelope(i, null); serialWrite('R'); serialWrite('N ' + i + ' 0 440.00'); serialWrite('F ' + i + ' 600');
 }
 function atualizarTestes(){ document.querySelectorAll('#pinos button').forEach(b => b.disabled = !ser.writer || playing); }
 async function serialClose(lost){

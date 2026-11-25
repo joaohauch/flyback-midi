@@ -22,8 +22,9 @@ computador.
 |---|---|
 | `P c g` | O canal `c` passa a acionar o GPIO `g`. `g = -1` libera o canal. |
 | `R` | Zera o relógio: o instante em que a linha chega é t = 0. Esvazia as filas. |
-| `N c t f` | No instante `t` ms, o canal `c` passa a tocar `f` Hz. |
-| `F c t` | No instante `t` ms, o canal `c` silencia. |
+| `E c atk tau sus rel` | Receita do envelope do canal `c`, mandada antes de cada `R` de tocar: ataque de `atk` ms até o pico, decaimento com constante `tau` ms (0 = sem decaimento) até o patamar `sus` ‰ do pico, e soltura de `rel` ms depois do `F`. Vale da próxima nota em diante. |
+| `N c t f a` | No instante `t` ms, o canal `c` passa a tocar `f` Hz com força `a` ‰ (de 0 a 1000). Sem `a`, vale 1000. |
+| `F c t` | No instante `t` ms, o canal `c` começa a soltura e depois silencia. |
 | `X` | Silencia todos os canais agora e esvazia as filas. |
 | `D c d f` | Tom contínuo, do gerador de tom: o canal `c` toca `f` Hz com o arco aberto `d` ‰ de cada período (500 = onda quadrada, o máximo; 0 termina). Dura 2 s, e cada `D` novo renova: se a página parar, o arco apaga sozinho. Esvazia a fila do canal; `N`, `F`, `R` ou `X` cancelam. |
 
@@ -33,6 +34,33 @@ computador.
   já vem aplicada.
 - Duas notas seguidas no mesmo canal chegam como dois `N` sem `F` entre eles.
   O `F` só aparece quando há silêncio de verdade.
+- `a` é inteiro e sai da mesma conta que o áudio da página usa (`forca` no `index.html`): com
+  "Dinâmica" ligada no canal, 250 + 750·(v/127)^1,4, onde v é a velocity da nota (96 quando
+  falta); desligada, 1000. O ganho do mixer **não** entra: é o volume do computador, e o arco vai
+  até o máximo dele.
+
+### Envelope
+
+A página manda um `E` por canal antes de cada `R` de tocar, traduzido de `ENVELOPES` no
+`index.html`: `tau = env.tau·1000`, `sus = env.sus·1000`, com `atk` = 4 (o `ATAQUE`) e `rel` = 6 (a
+rampa final do áudio). Envelope novo na página passa a valer no arco sem mexer no firmware.
+
+| Envelope no mixer | Linha |
+|---|---|
+| nenhum | `E c 4 0 1000 6` |
+| percussivo | `E c 4 120 100 6` |
+| médio | `E c 4 450 350 6` |
+| sustentado | `E c 4 1200 700 6` |
+| corda | `E c 4 900 0 6` |
+
+O firmware desenha a curva a cada 1 ms — nível L = a/1000 × envelope — e a aplica pela **fração
+aberta** do período da nota, d = asin(L)/π, a mesma conta do volume do gerador de tom: o volume do
+arco na V3.6 segue sen(π·d), máximo em d = 50% (a onda quadrada). Uma nota de 2 s em "corda" sai
+com 50% no começo, 19% em 0,5 s, 11% em 1 s e 3,5% no fim; força 300 dá 10% parado.
+
+**Compatibilidade:** firmware antigo ignora o `E` e lê só os três primeiros campos do `N` — toca
+como sempre, a nota inteira em 50%. Firmware novo sem `E` (página antiga) fica com o envelope
+reto, e sem `a`, com força 1000: também como sempre.
 
 ### Pinos
 
@@ -64,7 +92,8 @@ N c 0 440.00
 F c 600
 ```
 
-Um lá de 0,6 s naquele canal, para achar qual flyback é qual ao montar a bancada.
+Um lá de 0,6 s naquele canal, para achar qual flyback é qual ao montar a bancada. Antes do `R`
+vai `E c 4 0 1000 6`: o teste é reto, no máximo, seja qual for o envelope da última música.
 
 ## Tempo
 
@@ -95,11 +124,17 @@ P 2 6
 P 3 7
 P 4 15
 P 5 16
+E 0 4 900 0 6
+E 1 4 900 0 6
+E 2 4 900 0 6
+E 3 4 900 0 6
+E 4 4 900 0 6
+E 5 4 900 0 6
 R
-N 0 60 659.26
-N 1 60 82.41
-N 2 60 207.65
-N 1 260 164.81
+N 0 60 659.26 825
+N 1 60 82.41 825
+N 2 60 207.65 825
+N 1 260 164.81 825
 ```
 
 ## Recepção no firmware, em esboço
@@ -110,8 +145,9 @@ switch (linha[0]) {
   case 'P': sscanf(linha + 2, "%d %d", &c, &g);         silencia(c); fixa_pino(c, g); break;
   case 'R': t0 = millis(); limpa_filas(); break;
   case 'X': silencia_todos(); limpa_filas(); break;
-  case 'N': sscanf(linha + 2, "%d %lu %f", &c, &t, &f); enfileira(c, t0 + t, f); break;
-  case 'F': sscanf(linha + 2, "%d %lu", &c, &t);        enfileira(c, t0 + t, 0); break;
+  case 'E': sscanf(linha + 2, "%d %ld %ld %ld %ld", &c, &atk, &tau, &sus, &rel); receita(c, ...); break;
+  case 'N': a = 1000; sscanf(linha + 2, "%d %lu %f %d", &c, &t, &f, &a); enfileira(c, t0 + t, f, a); break;
+  case 'F': sscanf(linha + 2, "%d %lu", &c, &t);        enfileira(c, t0 + t, 0, 0); break;
 }
 ```
 
@@ -127,11 +163,17 @@ Dev Module" (o ESP32 comum, o "S1" de `hardware-decisoes.md`). Só usa o que vem
 - **Nota pelo LEDC**, um timer por canal: cada canal tem a sua frequência. O ESP32 comum tem 8
   timers e cobre os 6 canais; o S3 tem 4, e lá só os canais 1 a 4 tocam. Onda quadrada de 50%,
   resolução de 13 bits — de 9,5 Hz a 9,7 kHz; com 10 bits nada abaixo de 76 Hz sairia.
+- **Envelope e força** (nov/2026): cada canal guarda a receita do `E`, e a cada 1 ms o firmware
+  recalcula o nível da nota soando e escreve o duty do LEDC só quando ele muda. Nível 1 é a onda
+  quadrada de antes (50%); abaixo disso, pulso mais estreito, na polaridade do circuito. O `D`
+  e o botão BOOT não passam pelo envelope. A versão gravada aparece no boot e no `?`
+  (`nov/2026 · envelope`), junto com o envelope de cada canal.
 - **Polaridade** é a constante `LOGICA_INVERTIDA`, no topo do sketch. Na placa **V3.6** é
   `false`: a nota entra pelo 6N136 e passa pelo Q1 até o RESET do 555, as duas inversões se
   anulam, e GPIO em ALTO libera o arco. Na V3.5 antiga (um NPN direto no pino 4) é `true`. Fica no
   firmware, e não na página, porque o silêncio tem de estar certo também sem a página: no boot,
-  com o navegador fechado, com a aba travada. Na nota, a polaridade não muda nada (50% é 50%).
+  com o navegador fechado, com a aba travada. Na nota em 50%, a polaridade não muda nada; abaixo
+  disso, o firmware inverte o duty na lógica invertida.
 - **Tom contínuo** (`D`): o gerador de tom (`tom.html`), no modo "ESP32 pela serial", põe só o
   canal 1 no pino escolhido (`P 0 g`, e `P c -1` nos outros) e manda um `D 0` a cada 500 ms; o
   volume da página vira a fração aberta d, e o volume do arco segue sen(π·d), máximo em 50%.

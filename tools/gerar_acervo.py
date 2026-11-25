@@ -55,6 +55,49 @@ def ler_creditos():
     return mapa
 
 
+# Categorias do site (nov/2026, pedido do dono do projeto, no lugar de "antigas" e "temas"):
+# clássicas, jogos, filmes e séries, rock, pop e transcritas. São campo, não pasta: uma música pode
+# estar em mais de uma (o Tetris é jogo e é folclore russo), e as bandas se dividem em rock e pop
+# pelo gênero. O grupo é a hierarquia dentro da categoria (Nintendo › Mario, Queen, Alemanha e
+# Áustria › Bach), que o site usa no seletor no lugar do cabeçalho de pasta em cada música.
+POP = {'pop', 'soul', 'disco', 'folk', 'country', 'eletrônica', 'choro', 'trilha sonora', 'jazz', 'hip-hop', 'gaúcha'}
+
+
+def categorizar(item, info):
+    partes = item['pasta'].split('/') if item['pasta'] else []
+    raiz = partes[0] if partes else ''
+    cats, grupo = [], ''
+    if raiz == 'transcritas':
+        cats, grupo = ['transcritas'], item.get('artista') or item.get('autor') or ''
+    elif raiz == 'classicos':
+        cats, grupo = ['clássicas'], ' › '.join(partes[1:])
+    elif raiz == 'folk russo':
+        cats, grupo = ['clássicas'], 'Rússia e Leste Europeu › Folclore russo'
+    elif raiz == 'exemplos':
+        cats, grupo = ['clássicas', 'rock'], 'Arranjos do projeto'
+    elif raiz == 'temas':
+        cats, grupo = [partes[1]] if len(partes) > 1 else [], ' › '.join(partes[2:])
+    elif raiz == 'bandas':
+        estilo = (item.get('estilo') or '').casefold()
+        cats = ['clássicas'] if estilo == 'baroque' else ['pop'] if estilo in POP else ['rock']
+        grupo = partes[1] if len(partes) > 1 else ''
+    # Korobeiniki é o tema do Tetris e é folclore russo: nas duas categorias, cada uma com o seu
+    # grupo, venha de onde vier (temas, folk russo ou os arranjos do projeto)
+    outros = {}
+    if 'korobeiniki' in sem_acento(item['titulo']):
+        outros = {'jogos': 'Nintendo › Tetris', 'clássicas': 'Rússia e Leste Europeu › Folclore russo'}
+    for c in list(info.get('categorias') or []) + list(outros):
+        if c not in cats:
+            cats.append(c)
+    if cats:
+        item['categorias'] = cats
+    if grupo:
+        item['grupo'] = grupo
+    grupos = {c: g for c, g in outros.items() if c in cats and c != cats[0] and g != grupo}
+    if grupos:
+        item['grupos'] = grupos
+
+
 def ordem_das_pastas():
     arq = PASTA / 'pastas.txt'
     if not arq.is_file():
@@ -90,6 +133,7 @@ def gerar():
             if 'MuScriptor' in texto:
                 # o site da Kyutai roda o medium, o mesmo que a GPU daqui: é MuScriptor, não Mirelo
                 item['origem'] = 'muscriptor' if 'localmente' in texto or 'kyutai.org' in texto else 'mirelo'
+            categorizar(item, info)
             itens.append(item)
 
     ordem = ordem_das_pastas()

@@ -24,7 +24,7 @@ from lote import artista_mb  # noqa: E402
 RAIZ = Path(__file__).resolve().parent.parent
 PASTAS = ['bandas', 'transcritas']
 # o que o MusicBrainz não classifica e se sabe com segurança
-MANUAL = {'coda': 'Anime', 'baitaca': 'Gaúcha', 'purcell henry': 'Baroque',
+MANUAL = {'coda': 'Anime', 'baitaca': 'Gaúcha', 'purcell henry': 'Baroque', 'abba': 'Pop', 'the who': 'Rock',
           'nintendo': 'Trilha sonora', 'jun ishikawa, dan miyakawa': 'Trilha sonora',
           'disney themes': 'Trilha sonora', 'movie themes': 'Trilha sonora', 'tv themes': 'Trilha sonora',
           # grafados de outro jeito no MusicBrainz ("Daryl Hall & John Oates")

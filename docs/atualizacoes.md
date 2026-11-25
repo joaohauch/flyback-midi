@@ -6,7 +6,28 @@ bancada ler depois do `git pull`. O passo a passo de gravar e testar continua em
 `docs/bancada-esp32.md`.
 
 **Antes de testar:** `git pull` e grave o firmware de novo (passos 2 a 4 do roteiro). O firmware
-de 21/out é o primeiro com o teste pelo botão BOOT e com os pinos da flash recusados.
+de nov/2026 é o primeiro com envelope e força nas notas; o boot e o `?` dizem `nov/2026 · envelope`.
+
+## nov/2026 — envelope e força no arco
+
+- **O que mudou:** até aqui o arco tocava toda nota no máximo (onda quadrada de 50%) do começo ao
+  fim; envelope e "Dinâmica" do mixer só valiam no som do computador. Agora a página manda a
+  receita do envelope de cada canal (`E c atk tau sus rel`, antes de cada `R`) e a força de cada
+  nota (`N c t f a`), e o firmware desenha a curva a cada 1 ms pela fração aberta do período,
+  d = asin(nível)/π — a mesma conta do volume do gerador de tom. Detalhes e tabela em
+  `docs/protocolo-serial.md`, seção "Envelope".
+- **Compatível nos dois sentidos:** firmware antigo ignora o `E` e a força e toca como antes;
+  firmware novo com página antiga também.
+- **Compilado** com PlatformIO (pacote espressif32, Arduino) para ESP32 e ESP32-S3, sem erro nem
+  aviso; ainda não rodou numa placa.
+- **Testar:** `python firmware/testar_serial.py COM5` agora toca três lás de 2 s no canal 1:
+  reto (pulso parado em 50%), "corda" (pulso estreitando até ~4% no fim) e força 30% (~10%
+  parado). Pelo site, a mesma música com envelope "nenhum" e "corda" no mixer.
+- **A medir na bancada:** abaixo de que fração aberta o arco deixa de soar. Se a nota sumir antes
+  da hora no fim do decaimento, o conserto é um mínimo de fração no firmware enquanto a nota
+  soa — anotar o valor em Resultados.
+- **Site:** favoritas no acervo (estrela em cada música, botão "favoritas"), guardadas no
+  navegador.
 
 ## 21/out — teste sem computador
 
@@ -88,7 +109,6 @@ Achado ouvindo várias músicas pelos flybacks.
 - **Mudanças no site que o dono do projeto quer fazer** — anotar aqui quando vierem.
 - **Reconectar a serial sozinho** quando ela cai: o Web Serial deixa reabrir uma porta já autorizada
   sem pedir de novo. Não feito.
-- **Envelope durante a música** pela fração aberta, como o volume do gerador de tom já faz.
 - **Nota grave curta**: em Dude Looks Like a Lady o baixo tem notas de 47 ms a 49 Hz — dois ciclos
   no arco. Se incomodar, mínimo em ciclos em vez de milissegundos.
 - **Decisões:** testar Eye of the Tiger no Mirelo (gasta crédito); trazer as três versões de fã de

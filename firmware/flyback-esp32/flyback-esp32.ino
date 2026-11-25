@@ -1,8 +1,10 @@
 /*
   flyback-esp32 — o firmware dos flybacks para o site flyback-midi.
 
-  Recebe pela serial o protocolo de docs/protocolo-serial.md (P, R, N, F, X, D e ?) e toca cada
+  Recebe pela serial o protocolo de docs/protocolo-serial.md (P, E, R, N, F, X, D e ?) e toca cada
   canal como onda quadrada na frequência da nota, num GPIO que interrompe o oscilador do flyback.
+  O volume da nota — força (velocity) e envelope (ataque, decaimento, sustentação, soltura) — sai
+  pela fração do período em que o arco fica aberto, recalculada a cada 1 ms (ver ENVELOPE abaixo).
   Sem computador, o botão BOOT liga e desliga um tom de teste de 440 Hz no GPIO 4 (ver TESTE_*).
 
   Testado com: ESP32 comum ("ESP32 Dev Module" no Arduino). Compila também para o ESP32-S3,
@@ -13,6 +15,10 @@
 #include <Arduino.h>
 #include "driver/ledc.h"
 #include "esp_system.h"
+#include <math.h>
+
+// Aparece no boot e no "?": para saber, pelo monitor serial, qual versão está gravada na placa.
+const char *VERSAO = "nov/2026 · envelope";
 
 // ------------------------------------------------------------------ ajuste para o seu circuito
 
@@ -74,13 +80,23 @@ const uint32_t METADE = CHEIO / 2;            // onda quadrada
 const uint32_t SILENCIO = LOGICA_INVERTIDA ? CHEIO : 0;
 
 // ------------------------------------------------------------------ filas
-struct Evento { uint32_t quando; float f; };   // f = 0: silêncio
+struct Evento { uint32_t quando; float f; uint16_t a; };   // f = 0: silêncio; a: força em ‰
 const int FILA = 96;
 struct Canal {
   int pino = -1;
   bool soando = false;
   bool direto = false;                         // tocando um "D"
   uint32_t desde = 0, diretoAte = 0;
+  // envelope ("E c atk tau sus rel"): o padrão é reto, o arco no máximo a nota inteira, que é como
+  // o firmware tocava antes do envelope — e como toca se a página for antiga e não mandar o "E"
+  uint16_t atk = 0, sus = 1000, rel = 0;
+  uint32_t tau = 0;
+  float pico = 1;                              // força da nota, 0 a 1 (o "a" do N)
+  bool soltando = false;                       // depois do F, na rampa de soltura
+  uint32_t soltouEm = 0;
+  float nivelSolto = 0;                        // o nível no instante do F
+  float nivel = 0;                             // o nível de agora, 0 a 1
+  uint32_t dutyAgora = 0xFFFFFFFF;             // o último duty escrito, para só escrever quando muda
   Evento fila[FILA];
   int n = 0;
 };
@@ -94,15 +110,24 @@ static void pinoSeguro(int g) {                // pino solto do LEDC, parado no 
 }
 
 static void duty(int c, uint32_t d) {
+  if (canal[c].dutyAgora == d) return;
+  canal[c].dutyAgora = d;
   ledc_set_duty(modoDe(c), canalDe(c), d);
   ledc_update_duty(modoDe(c), canalDe(c));
 }
 
 static void silencia(int c) {
   canal[c].direto = false;
+  canal[c].soltando = false;
   if (canal[c].pino < 0) return;
   duty(c, SILENCIO);
   canal[c].soando = false;
+}
+
+// Fração aberta em ‰ → duty do LEDC, na polaridade do circuito
+static uint32_t dutyAberto(uint32_t milesimos) {
+  uint32_t aberto = milesimos * CHEIO / 1000;
+  return LOGICA_INVERTIDA ? CHEIO - aberto : aberto;
 }
 
 // "D c d f": tom contínuo de f Hz com o arco aberto d ‰ de cada período (500 = onda quadrada, o
@@ -114,19 +139,72 @@ static void tomDireto(int c, int d, float f) {
   uint32_t hz = (uint32_t)lroundf(f);
   if (d <= 0 || hz < 10 || ledc_set_freq(modoDe(c), timerDe(c), hz) != ESP_OK) { silencia(c); return; }
   if (d > 900) d = 900;
-  uint32_t aberto = (uint32_t)d * CHEIO / 1000;
-  duty(c, LOGICA_INVERTIDA ? CHEIO - aberto : aberto);
+  duty(c, dutyAberto((uint32_t)d));
   k.soando = true; k.direto = true;
   k.desde = millis(); k.diretoAte = k.desde + DIRETO_MS;
 }
 
-static void toca(int c, float f) {
-  if (canal[c].pino < 0) return;
+// ------------------------------------------------------------------ ENVELOPE
+// O volume do arco na V3.6 segue sen(π·d), onde d é a fração do período da nota em que o arco fica
+// aberto: máximo em d = 50% (a onda quadrada) e zero em d = 0 (simulação da conversa do circuito,
+// FlybachSimulations/sim_envelope.py). Para um nível L de 0 a 1, d = asin(L)/π — a mesma conta que
+// o gerador de tom (tom.html) já usa para o volume. O nível é a força da nota vezes a curva do
+// envelope, igual à do áudio da página: rampa de atk ms até 1, depois decai com constante tau até
+// sus, e no F desce em rel ms até 0. Recalculado a cada 1 ms em executa().
+static uint32_t abertoDe(float L) {           // nível 0..1 → fração aberta em ‰ (0..500)
+  if (L <= 0) return 0;
+  if (L >= 1) return 500;
+  return (uint32_t)lroundf(1000.0f * asinf(L) / (float)M_PI);
+}
+static float curva(int c, uint32_t agora) {   // por índice: o Arduino declara as funções antes do struct
+  const Canal &k = canal[c];
+  uint32_t t = agora - k.desde;
+  float e;
+  if (t < k.atk) e = (float)t / k.atk;
+  else if (!k.tau) e = 1;
+  else {
+    float s = k.sus / 1000.0f;
+    e = s + (1 - s) * expf(-(float)(t - k.atk) / (float)k.tau);
+  }
+  return k.pico * e;
+}
+static void envelope(int c, uint32_t agora) {
+  Canal &k = canal[c];
+  if (!k.soando || k.direto || k.pino < 0) return;
+  float L;
+  if (k.soltando) {
+    uint32_t t = agora - k.soltouEm;
+    if (t >= k.rel) { silencia(c); return; }
+    L = k.nivelSolto * (1 - (float)t / k.rel);
+  } else L = curva(c, agora);
+  k.nivel = L;
+  uint32_t d = abertoDe(L);
+  duty(c, d >= 500 ? METADE : dutyAberto(d));   // 50%: tanto faz a polaridade
+}
+static void toca(int c, float f, uint16_t a) {
+  Canal &k = canal[c];
+  if (k.pino < 0) return;
   uint32_t hz = (uint32_t)lroundf(f);
   if (hz < 10 || ledc_set_freq(modoDe(c), timerDe(c), hz) != ESP_OK) { silencia(c); return; }
-  duty(c, METADE);   // 50%: tanto faz a polaridade, o arco liga e desliga na frequência da nota
-  canal[c].soando = true;
-  canal[c].desde = millis();
+  k.pico = (a > 1000 ? 1000 : a) / 1000.0f;
+  k.soando = true; k.soltando = false;
+  k.desde = millis();
+  envelope(c, k.desde);                         // com ataque, começa em 0 e sobe nos próximos ms
+}
+// F: começa a soltura; sem soltura, silencia já
+static void solta(int c) {
+  Canal &k = canal[c];
+  if (!k.soando || k.direto || !k.rel) { silencia(c); return; }
+  k.soltando = true; k.soltouEm = millis(); k.nivelSolto = k.nivel;
+}
+// "E c atk tau sus rel": a receita do envelope do canal; vale da próxima nota em diante
+static void receita(int c, long atk, long tau, long sus, long rel) {
+  if (c < 0 || c > 5) return;
+  Canal &k = canal[c];
+  k.atk = (uint16_t)constrain(atk, 0L, 1000L);
+  k.tau = (uint32_t)constrain(tau, 0L, 60000L);
+  k.sus = (uint16_t)constrain(sus, 0L, 1000L);
+  k.rel = (uint16_t)constrain(rel, 0L, 2000L);
 }
 
 static int donoDoPino(int g, int fora) {
@@ -192,27 +270,31 @@ static void fixaPino(int c, int g) {
 }
 
 // insere mantendo a fila em ordem de tempo; a página manda quase sempre em ordem
-static void enfileira(int c, uint32_t quando, float f) {
+static void enfileira(int c, uint32_t quando, float f, uint16_t a) {
   if (c < 0 || c > 5 || canal[c].pino < 0) return;
   Canal &k = canal[c];
   if (k.direto) silencia(c);                   // nota de música cancela o tom contínuo
   if (k.n >= FILA) { perdidos++; return; }
   int i = k.n;
   while (i > 0 && (int32_t)(k.fila[i - 1].quando - quando) > 0) { k.fila[i] = k.fila[i - 1]; i--; }
-  k.fila[i] = {quando, f};
+  k.fila[i] = {quando, f, a};
   k.n++;
 }
 
 static void executa() {
+  static uint32_t ultimoMs = 0;
   uint32_t agora = millis();
+  bool novoMs = agora != ultimoMs;               // o envelope anda de 1 em 1 ms
+  ultimoMs = agora;
   for (int c = 0; c < 6; c++) {
     Canal &k = canal[c];
     while (k.n && (int32_t)(agora - k.fila[0].quando) >= 0) {
       Evento e = k.fila[0];
       for (int i = 1; i < k.n; i++) k.fila[i - 1] = k.fila[i];
       k.n--;
-      if (e.f > 0) toca(c, e.f); else silencia(c);
+      if (e.f > 0) toca(c, e.f, e.a); else solta(c);
     }
+    if (novoMs) envelope(c, agora);
     if (k.direto) { if ((int32_t)(agora - k.diretoAte) > 0) silencia(c); }
     else if (k.soando && !k.n && agora - k.desde > NOTA_MAXIMA_MS) silencia(c);
   }
@@ -246,12 +328,19 @@ static void trata(char *s) {
     case 'P': if (sscanf(s + 1, "%d %d", &c, &g) == 2) fixaPino(c, g); break;
     case 'R': t0 = millis(); for (int i = 0; i < 6; i++) canal[i].n = 0; break;
     case 'X': for (int i = 0; i < 6; i++) { silencia(i); canal[i].n = 0; } break;
-    case 'N': if (sscanf(s + 1, "%d %ld %f", &c, &t, &f) == 3 && t >= 0) enfileira(c, t0 + (uint32_t)t, f); break;
-    case 'F': if (sscanf(s + 1, "%d %ld", &c, &t) == 2 && t >= 0) enfileira(c, t0 + (uint32_t)t, 0); break;
+    // a força é opcional: página antiga manda "N c t f", e a nota vai no máximo, como antes
+    case 'N': { int a = 1000; if (sscanf(s + 1, "%d %ld %f %d", &c, &t, &f, &a) >= 3 && t >= 0)
+                  enfileira(c, t0 + (uint32_t)t, f, (uint16_t)constrain(a, 0, 1000)); break; }
+    case 'F': if (sscanf(s + 1, "%d %ld", &c, &t) == 2 && t >= 0) enfileira(c, t0 + (uint32_t)t, 0, 0); break;
+    case 'E': { long atk, tau, sus, rel; if (sscanf(s + 1, "%d %ld %ld %ld %ld", &c, &atk, &tau, &sus, &rel) == 5)
+                  receita(c, atk, tau, sus, rel); break; }
     case 'D': { int d; if (sscanf(s + 1, "%d %d %f", &c, &d, &f) == 3) tomDireto(c, d, f); break; }
     case '?':                                  // para conferir pelo monitor serial
-      Serial.printf("lógica %s · %d canais · pinos", LOGICA_INVERTIDA ? "invertida" : "direta", CANAIS);
+      Serial.printf("%s · lógica %s · %d canais · pinos", VERSAO, LOGICA_INVERTIDA ? "invertida" : "direta", CANAIS);
       for (int i = 0; i < 6; i++) Serial.printf(" %d", canal[i].pino);
+      Serial.print(" · envelopes");
+      for (int i = 0; i < 6; i++)
+        Serial.printf(" [%u %lu %u %u]", canal[i].atk, (unsigned long)canal[i].tau, canal[i].sus, canal[i].rel);
       Serial.printf(" · eventos perdidos %lu · ligado há %lu s · último reinício: %s\n", (unsigned long)perdidos,
                     (unsigned long)(millis() / 1000), motivoReinicio());
       break;
@@ -316,7 +405,7 @@ void setup() {
   pinMode(TESTE_BOTAO, INPUT_PULLUP);
   Serial.begin(BAUD);
   for (int i = 0; i < CANAIS; i++) fixaPino(i, PINOS_PADRAO[i]);
-  Serial.printf("flyback-esp32 pronto · lógica %s · %d canais · reinício: %s\n",
+  Serial.printf("flyback-esp32 pronto · %s · lógica %s · %d canais · reinício: %s\n", VERSAO,
                 LOGICA_INVERTIDA ? "invertida (ALTO corta o arco)" : "direta (ALTO libera o arco)", CANAIS, motivoReinicio());
 }
 

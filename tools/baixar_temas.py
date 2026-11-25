@@ -3,7 +3,7 @@
 
     python tools/baixar_temas.py               # mede os candidatos e lista a escolha, sem gravar
     python tools/baixar_temas.py --baixar      # grava a escolha no acervo, com crédito
-    python tools/baixar_temas.py --so jogos    # só uma categoria (ou parte do nome da obra)
+    python tools/baixar_temas.py --so Nintendo # só o que tiver isto na pasta ou no título
     python tools/baixar_temas.py --navegador   # abre no navegador o que só se baixa à mão
 
 Por que existe: o dono do projeto pediu música "marcante" (Undertale, a abertura de Gravity
@@ -92,54 +92,112 @@ RX_FORA = re.compile(r'remix|medley|mash.?up|lateralus|mmadd|composition project
 DUR_MAX = 6.5 * 60
 
 
-# (categoria, obra, título, quem compôs, fontes). Expressões sem distinção de maiúsculas.
+# (pasta dentro de musicas/temas, título, quem compôs, fontes[, extras do crédito]). A pasta é a
+# hierarquia que o site mostra: jogos/<empresa>/<franquia>, filmes e séries/<Filmes|Séries e TV|
+# Desenhos e animes>. O título diz de onde é a música, porque a lista não mostra mais a pasta.
+# O Hino Nacional e Brasileirinho saíram daqui em 25/nov/2026: estão em classicos e em bandas.
 TEMAS = [
-    # --- jogos: NES e Game Boy cabem em dois flybacks; o resto pede mais
-    ('jogos', 'Undertale', 'Megalovania', 'Toby Fox', [V('windows', r'^Undertale$', r'^Megalovania'), P(r'megalovania')]),
-    ('jogos', 'Undertale', 'Hopes and Dreams', 'Toby Fox', [V('windows', r'^Undertale$', r'^Hopes and Dreams$')]),
-    ('jogos', 'Undertale', 'Spider Dance', 'Toby Fox', [V('windows', r'^Undertale$', r'^Spider Dance')]),
-    ('jogos', 'Undertale', 'Bonetrousle', 'Toby Fox', [V('windows', r'^Undertale$', r'^Bonetrousle')]),
-    ('jogos', 'Undertale', 'Fallen Down', 'Toby Fox', [V('windows', r'^Undertale$', r'^Fallen Down')]),
-    ('jogos', 'Top Gun (NES)', 'Abertura', 'Konami', [V('nes', r'^Top Gun$', r'demo|title')]),
-    ('jogos', 'Top Gun (NES)', 'Reabastecimento', 'Konami', [V('nes', r'^Top Gun$', r'fuel')]),
-    ('jogos', 'Super Mario Bros.', 'Tema principal', 'Koji Kondo', [V('nes', r'^Super Mario Bros\.?$', r'overworld|ground|main'), P(r'^super mario bros\.? theme')]),
-    ('jogos', 'Super Mario Bros.', 'Subterrâneo', 'Koji Kondo', [V('nes', r'^Super Mario Bros\.?$', r'underground|underworld')]),
-    ('jogos', 'The Legend of Zelda', 'Tema principal', 'Koji Kondo', [V('nes', r'^Legend of Zelda, The$', r'overworld|main|title')]),
-    ('jogos', 'Tetris', 'Tipo A (Korobeiniki)', 'tradicional russo, arranjo de Hirokazu Tanaka', [V('gameboy', r'^Tetris$', r'type.?a|a.?type|music.?a|korobeiniki')]),
-    ('jogos', 'Pokémon Red e Blue', 'Abertura', 'Junichi Masuda', [V('gameboy', r'^Pok.mon \(Red, Blue, Yellow\)$', r'opening|title|intro')]),
-    ('jogos', 'Pokémon Red e Blue', 'Batalha', 'Junichi Masuda', [V('gameboy', r'^Pok.mon \(Red, Blue, Yellow\)$', r'battle')]),
-    ('jogos', 'Mega Man 2', 'Dr. Wily, fase 1', 'Takashi Tateishi', [V('nes', r'^Mega Man (2|II)$', r'wily.{0,12}(stage )?1\b|wily.?s castle')]),
-    ('jogos', 'Castlevania', 'Vampire Killer', 'Kinuyo Yamashita', [V('nes', r'^Castlevania$', r'vampire killer|stage 1'), P(r'vampire killer')]),
-    ('jogos', 'Contra', 'Selva', 'Kazuki Muraoka', [V('nes', r'^Contra$', r'jungle|stage 1|level 1')]),
-    ('jogos', 'Sonic the Hedgehog', 'Green Hill Zone', 'Masato Nakamura', [V('genesis', r'^Sonic the Hedgehog$', r'green hill'), P(r'green hill zone')]),
-    ('jogos', 'Street Fighter II', 'Tema do Guile', 'Yoko Shimomura', [V('snes', r'Street Fighter II', r'guile'), V('arcade', r'Street Fighter II', r'guile'), P(r"guile'?s theme")]),
-    ('jogos', 'Super Mario 64', 'Bob-omb Battlefield', 'Koji Kondo', [V('n64', r'^Super Mario 64$', r'bob.?omb|main theme')]),
-    ('jogos', 'Final Fantasy VII', 'Batalha', 'Nobuo Uematsu', [V('ps1', r'^Final Fantasy (7|VII)$', r'fighting|battle')]),
-    ('jogos', 'Chrono Trigger', 'Tema principal', 'Yasunori Mitsuda', [V('snes', r'^Chrono Trigger$', r'chrono trigger|main theme|title')]),
-    ('jogos', 'Minecraft', 'Sweden', 'C418', [P(r'sweden.*minecraft|minecraft.*sweden')]),
-    # --- desenhos e animes
-    ('desenhos e animes', 'Gravity Falls', 'Abertura', 'Brad Breeck', [P(r'gravity falls theme')]),
-    ('desenhos e animes', 'Pokémon', 'Abertura', 'John Siegler e John Loeffler', [P(r'pok.mon (tv show )?theme|indigo league')]),
-    ('desenhos e animes', 'Os Cavaleiros do Zodíaco', 'Pegasus Fantasy', 'Make-Up (Hiroaki Matsuzawa)', [P(r'pegasus fantasy')]),
-    ('desenhos e animes', 'Os Simpsons', 'Abertura', 'Danny Elfman', [P(r'^the simpsons')]),
-    ('desenhos e animes', 'A Pantera Cor-de-Rosa', 'Tema', 'Henry Mancini', [P(r'pink panther')]),
+    # --- jogos
+    ('jogos/Toby Fox/Undertale', 'Undertale - Megalovania', 'Toby Fox',
+     [('vgmusic', 'windows', '^Undertale$', '^Megalovania'), ('pdmx', 'megalovania')]),
+    ('jogos/Toby Fox/Undertale', 'Undertale - Hopes and Dreams', 'Toby Fox',
+     [('vgmusic', 'windows', '^Undertale$', '^Hopes and Dreams$')]),
+    ('jogos/Toby Fox/Undertale', 'Undertale - Spider Dance', 'Toby Fox',
+     [('vgmusic', 'windows', '^Undertale$', '^Spider Dance')]),
+    ('jogos/Toby Fox/Undertale', 'Undertale - Bonetrousle', 'Toby Fox',
+     [('vgmusic', 'windows', '^Undertale$', '^Bonetrousle')]),
+    ('jogos/Toby Fox/Undertale', 'Undertale - Fallen Down', 'Toby Fox',
+     [('vgmusic', 'windows', '^Undertale$', '^Fallen Down')]),
+    ('jogos/Konami/Top Gun', 'Top Gun (NES) - abertura', 'Konami',
+     [('vgmusic', 'nes', '^Top Gun$', 'demo|title')]),
+    ('jogos/Konami/Top Gun', 'Top Gun (NES) - reabastecimento', 'Konami',
+     [('vgmusic', 'nes', '^Top Gun$', 'fuel')]),
+    ('jogos/Nintendo/Mario', 'Super Mario Bros. - tema principal', 'Koji Kondo',
+     [('vgmusic', 'nes', '^Super Mario Bros\\.?$', 'overworld|ground|main'), ('pdmx', '^super mario bros\\.? theme')]),
+    ('jogos/Nintendo/Mario', 'Super Mario Bros. - subterrâneo', 'Koji Kondo',
+     [('vgmusic', 'nes', '^Super Mario Bros\\.?$', 'underground|underworld')]),
+    ('jogos/Nintendo/Zelda', 'The Legend of Zelda - tema principal', 'Koji Kondo',
+     [('vgmusic', 'nes', '^Legend of Zelda, The$', 'overworld|main|title')]),
+    ('jogos/Nintendo/Tetris', 'Tetris - tipo A (Korobeiniki)', 'tradicional russo, arranjo de Hirokazu Tanaka',
+     [('vgmusic', 'gameboy', '^Tetris$', 'type.?a|a.?type|music.?a|korobeiniki')], {'categorias': ['jogos', 'clássicas']}),
+    ('jogos/Nintendo/Pokémon', 'Pokémon Red e Blue - abertura', 'Junichi Masuda',
+     [('vgmusic', 'gameboy', '^Pok.mon \\(Red, Blue, Yellow\\)$', 'opening|title|intro')]),
+    ('jogos/Nintendo/Pokémon', 'Pokémon Red e Blue - batalha', 'Junichi Masuda',
+     [('vgmusic', 'gameboy', '^Pok.mon \\(Red, Blue, Yellow\\)$', 'battle')]),
+    ('jogos/Capcom/Mega Man', 'Mega Man 2 - Dr. Wily, fase 1', 'Takashi Tateishi',
+     [('vgmusic', 'nes', '^Mega Man (2|II)$', 'wily.{0,12}(stage )?1\\b|wily.?s castle')]),
+    ('jogos/Konami/Castlevania', 'Castlevania - Vampire Killer', 'Kinuyo Yamashita',
+     [('vgmusic', 'nes', '^Castlevania$', 'vampire killer|stage 1'), ('pdmx', 'vampire killer')]),
+    ('jogos/Konami/Contra', 'Contra - fase da selva', 'Kazuki Muraoka',
+     [('vgmusic', 'nes', '^Contra$', 'jungle|stage 1|level 1')]),
+    ('jogos/Sega/Sonic', 'Sonic the Hedgehog - Green Hill Zone', 'Masato Nakamura',
+     [('vgmusic', 'genesis', '^Sonic the Hedgehog$', 'green hill'), ('pdmx', 'green hill zone')]),
+    ('jogos/Capcom/Street Fighter', 'Street Fighter II - tema do Guile', 'Yoko Shimomura',
+     [('vgmusic', 'snes', 'Street Fighter II', 'guile'), ('vgmusic', 'arcade', 'Street Fighter II', 'guile'), ('pdmx', "guile'?s theme")]),
+    ('jogos/Nintendo/Mario', 'Super Mario 64 - Bob-omb Battlefield', 'Koji Kondo',
+     [('vgmusic', 'n64', '^Super Mario 64$', 'bob.?omb|main theme')]),
+    ('jogos/Square/Final Fantasy', 'Final Fantasy VII - batalha', 'Nobuo Uematsu',
+     [('vgmusic', 'ps1', '^Final Fantasy (7|VII)$', 'fighting|battle')]),
+    ('jogos/Square/Chrono Trigger', 'Chrono Trigger - tema principal', 'Yasunori Mitsuda',
+     [('vgmusic', 'snes', '^Chrono Trigger$', 'chrono trigger|main theme|title')]),
+    ('jogos/Mojang/Minecraft', 'Minecraft - Sweden', 'C418',
+     [('pdmx', 'sweden.*minecraft|minecraft.*sweden')]),
+    # do histórico do YouTube Music do dono do projeto (25/nov/2026); Elden Ring e Metro Exodus não
+    # existem em nenhuma das fontes
+    ('jogos/Nintendo/Zelda', 'The Legend of Zelda: Ocarina of Time - Gerudo Valley', 'Koji Kondo',
+     [V('n64', r'^Legend of Zelda, The: Ocarina of Time$', r'gerudo'), P(r'gerudo valley')]),
+    ('jogos/CD Projekt/The Witcher', 'The Witcher 3 - Hunt or Be Hunted', 'Marcin Przybyłowicz', [B('the-witcher-3-hunt-or-be-hunted-mid')]),
+    ('jogos/CD Projekt/The Witcher', 'The Witcher 3 - Ladies of the Woods', 'Marcin Przybyłowicz', [B('the-witcher-3-ladies-of-the-woods-mid')]),
+    ('jogos/CD Projekt/The Witcher', 'The Witcher 3 - The Fields of Ard Skellig', 'Marcin Przybyłowicz e Percival', [B('the-witcher-3-the-fields-of-ard-skellig-mid')]),
+    ('jogos/CD Projekt/The Witcher', 'The Witcher 3 - Blood and Wine', 'Marcin Przybyłowicz', [P(r'witcher 3 blood and wine')]),
+    ('jogos/Bethesda/The Elder Scrolls', 'Skyrim - Dragonborn (tema principal)', 'Jeremy Soule', [P(r'skyrim|dragonborn')]),
+    ('jogos/Firaxis/Civilization', 'Civilization IV - Baba Yetu', 'Christopher Tin', [P(r'baba yetu')]),
     # --- filmes e séries
-    ('filmes e séries', 'Missão: Impossível', 'Tema', 'Lalo Schifrin', [P(r'mission.? impossible')]),
-    ('filmes e séries', 'Piratas do Caribe', "He's a Pirate", 'Klaus Badelt e Hans Zimmer', [P(r"he'?s a pirate|pirates of the caribbean")]),
-    ('filmes e séries', 'Jurassic Park', 'Tema', 'John Williams', [P(r'jurassic park')]),
-    ('filmes e séries', 'Star Wars', 'Tema principal', 'John Williams', [P(r'star wars (main )?theme|^star wars$')]),
-    ('filmes e séries', 'Game of Thrones', 'Abertura', 'Ramin Djawadi', [P(r'game of thrones (main )?theme|^game of thrones$')]),
-    ('filmes e séries', 'Rocky', 'Gonna Fly Now', 'Bill Conti', [P(r'gonna fly now|rocky theme')]),
-    ('filmes e séries', 'Os Caça-Fantasmas', 'Ghostbusters', 'Ray Parker Jr.', [L(r'^Ray Parker Jr', r'ghostbusters'), P(r'^ghostbusters')]),
-    ('filmes e séries', 'Um Tira da Pesada', 'Axel F', 'Harold Faltermeyer', [L(r'^Harold Faltermeyer$', r'axel f'), P(r'axel f')]),
-    ('filmes e séries', 'Arquivo X', 'Abertura', 'Mark Snow', [L(r'^Television Theme Songs$', r'x-files'), P(r'x.?files')]),
-    ('filmes e séries', 'Miami Vice', 'Tema', 'Jan Hammer', [L(r'^Jan Hammer$', r'miami vice')]),
-    ('filmes e séries', '1492: A Conquista do Paraíso', 'Conquest of Paradise', 'Vangelis', [L(r'^Vangelis$', r'1492')]),
-    ('filmes e séries', 'O Poderoso Chefão', 'Tema', 'Nino Rota', [L(r'^101 Strings$', r'godfather'), P(r'godfather')]),
-    # --- Brasil (o Tema da Vitória só existe no BitMidi: --navegador)
-    ('Brasil', 'Fórmula 1', 'Tema da Vitória (Ayrton Senna)', 'Eduardo Souto Neto', [B('senna-mid')]),
-    ('Brasil', 'Hino Nacional Brasileiro', 'Hino Nacional', 'Francisco Manuel da Silva e Osório Duque-Estrada', [P(r'^hino nacional brasileiro')]),
-    ('Brasil', 'Brasileirinho', 'Brasileirinho', 'Waldir Azevedo', [P(r'^brasileirinho')]),
+    ('filmes e séries/Desenhos e animes', 'Cowboy Bebop - Tank! (abertura)', 'Yoko Kanno', [P(r'tank!.*cowboy bebop|^tank!')]),
+    ('filmes e séries/Desenhos e animes', 'Cowboy Bebop - Too Good Too Bad', 'Yoko Kanno', [P(r'too bad too good|too good too bad')]),
+    ('filmes e séries/Desenhos e animes', 'Cowboy Bebop - The Real Folk Blues (encerramento)', 'Yoko Kanno', [P(r'real folk blues')]),
+    ('filmes e séries/Desenhos e animes', 'Lupin III - tema', 'Yuji Ohno', [P(r'lupin the third|lupin iii')]),
+    ('filmes e séries/Desenhos e animes', 'Princesa Mononoke - The Legend of Ashitaka', 'Joe Hisaishi', [P(r'legend of ashitaka|mononoke')]),
+    ('filmes e séries/Desenhos e animes', 'Initial D - Running in the 90s', 'Max Coveri', [P(r"running in the 90'?s")]),
+    ('filmes e séries/Desenhos e animes', 'Initial D - Deja Vu', 'Dave Rodgers', [P(r'deja vu')]),
+    ('filmes e séries/Séries e TV', 'The Witcher (série) - Toss a Coin to Your Witcher', 'Sonya Belousova e Giona Ostinelli', [P(r'toss a coin')]),
+    ('filmes e séries/Filmes', 'Interestelar - Day One', 'Hans Zimmer', [P(r'interstellar')]),
+    ('filmes e séries/Desenhos e animes', 'Gravity Falls - abertura', 'Brad Breeck',
+     [('pdmx', 'gravity falls theme')]),
+    ('filmes e séries/Desenhos e animes', 'Pokémon (anime) - abertura', 'John Siegler e John Loeffler',
+     [('pdmx', 'pok.mon (tv show )?theme|indigo league')]),
+    ('filmes e séries/Desenhos e animes', 'Os Cavaleiros do Zodíaco - Pegasus Fantasy (abertura)', 'Make-Up (Hiroaki Matsuzawa)',
+     [('pdmx', 'pegasus fantasy')]),
+    ('filmes e séries/Desenhos e animes', 'Os Simpsons - abertura', 'Danny Elfman',
+     [('pdmx', '^the simpsons')]),
+    ('filmes e séries/Desenhos e animes', 'A Pantera Cor-de-Rosa - tema', 'Henry Mancini',
+     [('pdmx', 'pink panther')]),
+    ('filmes e séries/Filmes', 'Missão Impossível - tema', 'Lalo Schifrin',
+     [('pdmx', 'mission.? impossible')]),
+    ('filmes e séries/Filmes', "Piratas do Caribe - He's a Pirate", 'Klaus Badelt e Hans Zimmer',
+     [('pdmx', "he'?s a pirate|pirates of the caribbean")]),
+    ('filmes e séries/Filmes', 'Jurassic Park - tema', 'John Williams',
+     [('pdmx', 'jurassic park')]),
+    ('filmes e séries/Filmes', 'Star Wars - tema principal', 'John Williams',
+     [('pdmx', 'star wars (main )?theme|^star wars$')]),
+    ('filmes e séries/Séries e TV', 'Game of Thrones - abertura', 'Ramin Djawadi',
+     [('pdmx', 'game of thrones (main )?theme|^game of thrones$')]),
+    ('filmes e séries/Filmes', 'Rocky - Gonna Fly Now', 'Bill Conti',
+     [('pdmx', 'gonna fly now|rocky theme')]),
+    ('filmes e séries/Filmes', 'Os Caça-Fantasmas - Ghostbusters', 'Ray Parker Jr.',
+     [('lakh', '^Ray Parker Jr', 'ghostbusters'), ('pdmx', '^ghostbusters')]),
+    ('filmes e séries/Filmes', 'Um Tira da Pesada - Axel F', 'Harold Faltermeyer',
+     [('lakh', '^Harold Faltermeyer$', 'axel f'), ('pdmx', 'axel f')]),
+    ('filmes e séries/Séries e TV', 'Arquivo X - abertura', 'Mark Snow',
+     [('lakh', '^Television Theme Songs$', 'x-files'), ('pdmx', 'x.?files')]),
+    ('filmes e séries/Séries e TV', 'Miami Vice - tema', 'Jan Hammer',
+     [('lakh', '^Jan Hammer$', 'miami vice')]),
+    ('filmes e séries/Filmes', '1492, A Conquista do Paraíso - Conquest of Paradise', 'Vangelis',
+     [('lakh', '^Vangelis$', '1492')]),
+    ('filmes e séries/Filmes', 'O Poderoso Chefão - tema', 'Nino Rota',
+     [('lakh', '^101 Strings$', 'godfather'), ('pdmx', 'godfather')]),
+    ('filmes e séries/Séries e TV', 'Fórmula 1 - Tema da Vitória (Ayrton Senna)', 'Eduardo Souto Neto',
+     [('bitmidi', 'senna-mid')]),
 ]
 
 
@@ -267,8 +325,12 @@ def nota(m):
     return m['ap2'] * (.6 if m['partes'] < 2 else 1)
 
 
-def tema_fontes(obra, titulo):
-    return next((t[4] for t in TEMAS if t[1] == obra and t[2] == titulo), [])
+def tema_fontes(pasta, titulo):
+    return next((t[3] for t in TEMAS if t[0] == pasta and t[1] == titulo), [])
+
+
+def extras(t):
+    return t[4] if len(t) > 4 else {}
 
 
 def downloads():
@@ -286,23 +348,24 @@ def pelo_navegador(temas, espera=180):
     para o acervo, com o crédito. O original fica em Downloads; salvo direto na pasta de temas,
     ele é movido para o lugar certo."""
     import webbrowser
-    pasta = downloads()
+    baixados = downloads()
     arq_cred = DESTINO / 'creditos.json'
     cred = json.loads(arq_cred.read_text(encoding='utf-8')) if arq_cred.is_file() else {}
-    for cat, obra, titulo, compositor, fontes in temas:
+    for t in temas:
+        pasta, titulo, compositor, fontes = t[:4]
         for f in fontes:
             if f[0] != 'bitmidi':
                 continue
-            rel = nfc(f'{cat}/{nome_arquivo(obra)}/{nome_arquivo(titulo)}.mid')
+            rel = nfc(f'{pasta}/{nome_arquivo(titulo)}.mid')
             if (DESTINO / rel).is_file():
                 print(f'   {titulo}: já está no acervo')
                 continue
             pagina = f'https://bitmidi.com/{f[1]}'
-            # o navegador pode perguntar onde salvar: além de Downloads, olha a pasta de temas
-            pastas = [pasta, DESTINO] + [x for x in DESTINO.rglob('*') if x.is_dir()]
+            # o navegador pode perguntar onde salvar: além de Downloads, olha musicas/ e a pasta de temas
+            pastas = [baixados, DESTINO.parent, DESTINO] + [x for x in DESTINO.rglob('*') if x.is_dir()]
             antes = {x for q in pastas if q.is_dir() for x in q.iterdir()}
             inicio = time.time()
-            print(f'   {titulo}: abri {pagina} — clique em baixar (espero {espera} s, em {pasta})', flush=True)
+            print(f'   {titulo}: abri {pagina} — clique em baixar (espero {espera} s, em {baixados})', flush=True)
             webbrowser.open(pagina)
             novo = None
             while time.time() - inicio < espera and not novo:
@@ -322,9 +385,9 @@ def pelo_navegador(temas, espera=180):
             alvo.write_bytes(dados)
             if novo.resolve().is_relative_to(DESTINO.resolve()) and novo.resolve() != alvo.resolve():
                 novo.unlink()                      # salvo direto no acervo: fica só no lugar certo
-            cred[rel] = {'autor': compositor, 'artista': obra, 'licenca': LICENCA,
+            cred[rel] = {'autor': compositor, 'artista': compositor, 'licenca': LICENCA, **extras(t),
                          'credito': f'composição de {compositor}; transcrição MIDI de autor não identificado, publicada no BitMidi',
-                         'transcricao': 'autor não identificado, publicada no BitMidi', 'estilo': cat, 'fonte': pagina,
+                         'transcricao': 'autor não identificado, publicada no BitMidi', 'fonte': pagina,
                          'aproveitamento': round(m['ap2'] * 100), 'aproveitamento6': round(m['ap6'] * 100)}
             arq_cred.write_text(json.dumps(cred, ensure_ascii=False, indent=1), encoding='utf-8')
             print(f'     {novo.name} -> temas/{rel} ({m["partes"]} partes, 2 flybacks {m["ap2"] * 100:.0f}%)')
@@ -337,7 +400,7 @@ def nome_arquivo(s):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--baixar', action='store_true', help='grava a escolha em musicas/temas, com crédito')
-    ap.add_argument('--so', help='só a categoria ou a obra que contenha este texto')
+    ap.add_argument('--so', help='só o que tiver este texto na pasta ou no título')
     ap.add_argument('--navegador', action='store_true',
                     help='abre no navegador os temas de site que proíbe robôs; você clica em baixar')
     args = ap.parse_args()
@@ -349,7 +412,7 @@ def main():
     por_tema = []
     for tema in temas:
         try:
-            cs = candidatos(tema[4])
+            cs = candidatos(tema[3])
         except Exception as e:                     # fonte fora do ar não derruba a lista toda
             print(f'  ! {tema[1]} — {tema[2]}: {e}', file=sys.stderr)
             cs = []
@@ -376,16 +439,17 @@ def main():
         escolhas.append((tema, medidos))
 
     cat_ant = None
-    for (cat, obra, titulo, compositor, _), medidos in escolhas:
-        if cat != cat_ant:
-            print(f'\n== {cat}')
-            cat_ant = cat
+    for tema, medidos in escolhas:
+        pasta, titulo = tema[0], tema[1]
+        if pasta != cat_ant:
+            print(f'\n== {pasta}')
+            cat_ant = pasta
         if not medidos:
-            manual = [f for f in tema_fontes(obra, titulo) if f[0] == 'bitmidi']
-            print(f'   {obra} — {titulo}: ' + ('pelo navegador (--navegador)' if manual else 'NÃO ACHEI'))
+            manual = [f for f in tema_fontes(pasta, titulo) if f[0] == 'bitmidi']
+            print(f'   {titulo}: ' + ('pelo navegador (--navegador)' if manual else 'NÃO ACHEI'))
             continue
         _, m, c, _ = medidos[0]
-        print(f'   {obra} — {titulo}: {m["partes"]:2d} partes, {m["dur"] / 60:4.1f} min, '
+        print(f'   {titulo}: {m["partes"]:2d} partes, {m["dur"] / 60:4.1f} min, '
               f'2 flybacks {m["ap2"] * 100:3.0f}%, 6 flybacks {m["ap6"] * 100:3.0f}%  ← {c["rotulo"][:70]}'
               f'  ({len(medidos)} versões)')
     achados = sum(1 for _, ms in escolhas if ms)
@@ -397,11 +461,12 @@ def main():
     metas = do_tar(PDMX / 'metadata.tar.gz', [ms[0][2]['meta'] for _, ms in escolhas if ms and ms[0][2]['fonte'] == 'pdmx'])
     arq_cred = DESTINO / 'creditos.json'
     cred = json.loads(arq_cred.read_text(encoding='utf-8')) if arq_cred.is_file() else {}
-    for (cat, obra, titulo, compositor, _), medidos in escolhas:
+    for tema, medidos in escolhas:
         if not medidos:
             continue
+        pasta, titulo, compositor = tema[:3]
         _, m, c, dados = medidos[0]
-        rel = nfc(f'{cat}/{nome_arquivo(obra)}/{nome_arquivo(titulo)}.mid')
+        rel = nfc(f'{pasta}/{nome_arquivo(titulo)}.mid')
         alvo = DESTINO / rel
         alvo.parent.mkdir(parents=True, exist_ok=True)
         alvo.write_bytes(dados)
@@ -415,11 +480,11 @@ def main():
             fonte = c['url']
         cred[rel] = {
             'autor': compositor,
-            'artista': obra,
+            'artista': compositor,
             'licenca': LICENCA,
             'credito': f'composição de {compositor}; {transcricao}',
             'transcricao': transcricao,
-            'estilo': cat,
+            **extras(tema),
             'fonte': fonte,
             'aproveitamento': round(m['ap2'] * 100),
             'aproveitamento6': round(m['ap6'] * 100),
