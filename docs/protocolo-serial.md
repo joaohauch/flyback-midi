@@ -1,20 +1,44 @@
 # Protocolo serial para o ESP32
 
-No modo **ESP32 · serial**, o `index.html` envia pela Web Serial API os segmentos
-monofônicos de cada canal, os mesmos `ch[i].segs` que alimentam a síntese. São de 1 a 6
-canais, um por flyback. O firmware só precisa enfileirar e executar no instante certo. O
-firmware está em `firmware/flyback-esp32/` (ver **Firmware**, no fim).
+Com o ESP32 conectado, o `index.html` envia — pela USB (Web Serial) ou pelo Bluetooth (Web
+Bluetooth) — os segmentos monofônicos de cada canal, os mesmos `ch[i].segs` que alimentam a
+síntese. São de 1 a 6 canais, um por flyback. O firmware só precisa enfileirar e executar no
+instante certo. O firmware está em `firmware/flyback-esp32/` (ver **Firmware**, no fim).
 
 No modo **Estéreo · P2** nada vai pela serial: os dois flybacks são acionados pelo áudio do
 computador.
 
 ## Transporte
 
-- Web Serial, 8N1, sem controle de fluxo. Velocidade escolhida na página:
-  115200 (padrão), 230400, 460800 ou 921600.
-- Texto ASCII, uma mensagem por linha, terminada em `\n`.
-- Funciona em Chrome e Edge no computador. Safari e Firefox não têm Web Serial, e a página
-  avisa quando não há suporte.
+As mesmas linhas por dois caminhos, escolhidos no seletor ao lado do Conectar (no player e no
+gerador de tom; a escolha fica em `flyback:esp`, com a placa e os pinos):
+
+- **USB** — Web Serial, 8N1, sem controle de fluxo. Velocidade escolhida na página: 115200
+  (padrão), 230400, 460800 ou 921600. Chrome e Edge no computador.
+- **Bluetooth** — Web Bluetooth (BLE), serviço UART da Nordic (NUS), que o firmware anuncia com o
+  nome `Flyback ESP32`. A página procura pelo serviço ou por nome começando com `Flyback`.
+  Chrome e Edge no computador (com adaptador Bluetooth) e **Chrome no Android**; o Safari do
+  iPhone não tem Web Bluetooth. Sem fio, também some o caminho da interferência do flyback pelo
+  cabo USB.
+
+| Característica | UUID | Uso |
+|---|---|---|
+| serviço | `6e400001-b5a3-f393-e0a9-e50e24dcca9e` | |
+| RX | `6e400002-b5a3-f393-e0a9-e50e24dcca9e` | a página escreve as linhas (com ou sem resposta) |
+| TX | `6e400003-b5a3-f393-e0a9-e50e24dcca9e` | o ESP notifica o que responde (o `?`, os avisos) |
+
+- Texto ASCII, uma mensagem por linha, terminada em `\n`. Uma linha pode chegar em vários
+  pacotes e um pacote pode trazer várias linhas: o firmware monta a linha de cada caminho
+  separada.
+- Pelo Bluetooth cada escrita leva no máximo MTU − 3 bytes: 20 até o MTU ser negociado (o Chrome
+  do Android não negocia), até 244 depois (o firmware aceita 247). A página pergunta `?` ao
+  conectar, e a resposta pelo Bluetooth traz `bluetooth conectado, mtu N`: dali em diante as
+  linhas vão juntas em pedaços de N − 3. Uma escrita por vez — duas ao mesmo tempo dão erro no
+  Web Bluetooth.
+- O firmware ouve a USB e o Bluetooth ao mesmo tempo e responde pelos dois. Se cai o Bluetooth
+  de quem estava tocando, o firmware silencia tudo na hora e volta a anunciar.
+- Safari e Firefox não têm nem Web Serial nem Web Bluetooth, e a página avisa; o caminho sem
+  suporte no navegador aparece desabilitado no seletor.
 
 ## Mensagens
 
@@ -26,6 +50,7 @@ computador.
 | `N c t f a` | No instante `t` ms, o canal `c` passa a tocar `f` Hz com força `a` ‰ (de 0 a 1000). Sem `a`, vale 1000. |
 | `F c t` | No instante `t` ms, o canal `c` começa a soltura e depois silencia. |
 | `X` | Silencia todos os canais agora e esvazia as filas. |
+| `?` | Pergunta o estado. A resposta é uma linha: versão, lógica, canais, pinos, envelopes, eventos perdidos, tempo ligado, motivo do último reinício, o Bluetooth (`anunciando "Flyback ESP32"` ou `conectado, mtu N`) e por onde veio a pergunta. A página manda ao conectar e mostra a versão (o começo, até ` · lógica`) ao lado do estado. |
 | `D c d f` | Tom contínuo, do gerador de tom: o canal `c` toca `f` Hz com o arco aberto `d` ‰ de cada período (500 = onda quadrada, o máximo; 0 termina). Dura 2 s, e cada `D` novo renova: se a página parar, o arco apaga sozinho. Esvazia a fila do canal; `N`, `F`, `R` ou `X` cancelam. |
 
 - `c` é o índice do canal, de `0` a `5` — o "Canal 1" da página é o `0`.
@@ -41,7 +66,10 @@ computador.
 
 ### Envelope
 
-A página manda um `E` por canal antes de cada `R` de tocar, traduzido de `ENVELOPES` no
+Só com **"envelope no arco"** ligado, ao lado de "ouvir no computador" (desligado por padrão,
+guardado em `flyback:esp`). Desligado, todo canal recebe `E c 4 0 1000 6` e todo `N` leva força
+1000: a nota sai inteira no máximo, como no firmware antigo. Ligado, a página manda um `E` por
+canal antes de cada `R` de tocar, traduzido de `ENVELOPES` no
 `index.html`: `tau = env.tau·1000`, `sus = env.sus·1000`, com `atk` = 4 (o `ATAQUE`) e `rel` = 6 (a
 rampa final do áudio). Envelope novo na página passa a valer no arco sem mexer no firmware.
 
@@ -97,8 +125,10 @@ vai `E c 4 0 1000 6`: o teste é reto, no máximo, seja qual for o envelope da �
 
 ## Tempo
 
-- A página manda cada evento cerca de 100 ms antes do instante `t`. O firmware
-  deve manter uma fila por canal, ordenada por `t`.
+- A página manda cada evento cerca de 100 ms antes do instante `t` — 300 ms pelo Bluetooth,
+  que demora mais a entregar. O firmware deve manter uma fila por canal, ordenada por `t`.
+  O relógio do ESP começa quando o `R` chega, então a demora constante do caminho atrasa tudo
+  por igual e não desalinha as notas entre si.
 - Evento com `t` já passado executa na hora.
 - Tocar, pular para outro ponto, silenciar um canal ou retomar depois de pausar gera `R` e
   recomeça a contagem. Pausar, parar, ou trocar para o modo estéreo gera `X`.

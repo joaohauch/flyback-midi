@@ -29,17 +29,59 @@ falhas = []
 # sem ESP32 nenhum ligado.
 SERIAL_FALSA = """
 (() => {
-  const dec = new TextDecoder();
+  const dec = new TextDecoder(), enc = new TextEncoder();
   window.__serial = { bytes: '', aberta: null, fechada: false };
+  let ctl = null;
   const porta = {
     async open(o){ window.__serial.aberta = o; },
     async close(){ window.__serial.fechada = true; },
+    /* o "?" tem resposta, como o firmware: a página mostra a versão gravada */
+    readable: new ReadableStream({ start(c){ ctl = c; } }),
     writable: { getWriter(){ return {
-      async write(b){ window.__serial.bytes += dec.decode(b); }, releaseLock(){} }; } }
+      async write(b){
+        const t = dec.decode(b);
+        window.__serial.bytes += t;
+        if (t === '?\\n' && !window.__serial.mudo) setTimeout(() => ctl.enqueue(enc.encode('nov/2026 · envelope · bluetooth · lógica direta · 4 canais · pinos 4 5 6 7 -1 -1 · bluetooth anunciando "Flyback ESP32" · pergunta pela USB\\r\\n')), 20);
+      }, releaseLock(){} }; } }
   };
   const alvo = new EventTarget();
   alvo.requestPort = async () => porta;
   Object.defineProperty(navigator, 'serial', { value: alvo });
+})();
+"""
+
+# ESP falso pelo Bluetooth: o serviço UART da Nordic, com o MTU de 23 (20 bytes por escrita) até o
+# "?" responder "mtu 185". Cada escrita demora 5 ms e conta quantas estão no ar ao mesmo tempo: o
+# Web Bluetooth recusa duas juntas, e a página tem de mandar uma por vez.
+BLE_FALSO = """
+(() => {
+  const dec = new TextDecoder(), enc = new TextEncoder();
+  const b = window.__ble = { bytes: '', escritas: [], noAr: 0, maxNoAr: 0, mtu: 23, grande: 0, conectado: false, feitas: 0 };
+  const tx = new EventTarget();
+  const notifica = txt => { const u = enc.encode(txt); for (let i = 0; i < u.length; i += b.mtu - 3) {
+    tx.value = new DataView(u.slice(i, i + b.mtu - 3).buffer); tx.dispatchEvent(new Event('characteristicvaluechanged')); } };
+  const rx = {
+    async writeValueWithoutResponse(u){
+      b.noAr++; b.maxNoAr = Math.max(b.maxNoAr, b.noAr);
+      if (u.length > b.mtu - 3) b.grande++;
+      await new Promise(ok => setTimeout(ok, 5));
+      b.noAr--; b.escritas.push(u.length);
+      b.bytes += dec.decode(u);
+      const linhas = b.bytes.split('\\n'); linhas.pop();
+      for (; b.feitas < linhas.length; b.feitas++) if (linhas[b.feitas] === '?') { b.mtu = 185;
+        setTimeout(() => notifica('nov/2026 · envelope · bluetooth · lógica direta · 4 canais · pinos 4 5 6 7 -1 -1 · bluetooth conectado, mtu 185 · pergunta pela Bluetooth\\r\\n'), 20); }
+    }
+  };
+  tx.startNotifications = async () => tx;
+  const dev = new EventTarget();
+  dev.name = 'Flyback ESP32';
+  dev.gatt = {
+    get connected(){ return b.conectado; },
+    async connect(){ b.conectado = true; return { getPrimaryService: async () => ({ getCharacteristic: async u => u.startsWith('6e400002') ? rx : tx }) }; },
+    disconnect(){ if (!b.conectado) return; b.conectado = false; dev.dispatchEvent(new Event('gattserverdisconnected')); }
+  };
+  b.cair = () => dev.gatt.disconnect();
+  Object.defineProperty(navigator, 'bluetooth', { value: { requestDevice: async o => { b.filtros = o; return dev; } } });
 })();
 """
 
@@ -336,8 +378,11 @@ def serial(nav, base):
     abrir(pg, base, 'exemplos/Korobeiniki.mid')
     linhas = lambda: pg.evaluate('window.__serial.bytes').splitlines()
     confere(pg.is_disabled('#pinos button'), '"testar" desabilitado antes de conectar')
-    pg.click('#serGo'); time.sleep(.2)
-    confere(linhas()[:7] == ['X', 'P 0 4', 'P 1 5', 'P 2 6', 'P 3 7', 'P 4 15', 'P 5 16'], 'ao conectar: X e os seis pinos')
+    confere(pg.is_visible('#via') and pg.input_value('#via') == 'usb' and pg.is_visible('#baud'), 'sem nada salvo, conecta pela USB, com a velocidade à mostra')
+    pg.click('#serGo'); time.sleep(.3)
+    confere(linhas()[:8] == ['?', 'X', 'P 0 4', 'P 1 5', 'P 2 6', 'P 3 7', 'P 4 15', 'P 5 16'], 'ao conectar: ? (a versão), X e os seis pinos')
+    confere('nov/2026' in pg.inner_text('#serMsg') and pg.is_disabled('#via'),
+            f'a resposta do ESP mostra a versão do firmware ({pg.inner_text("#serMsg")!r})')
     pg.click('#pinos .pino:nth-child(3) button')
     confere(linhas()[-4:] == ['E 2 4 0 1000 6', 'R', 'N 2 0 440.00', 'F 2 600'], 'testar o canal 3: envelope reto, sem decair')
     pg.select_option('#pinos .pino:nth-child(2) select', '21')
@@ -350,6 +395,14 @@ def serial(nav, base):
     confere(l[:6] == ['P 0 4', 'P 1 21', 'P 2 6', 'P 3 7', 'P 4 15', 'P 5 16'] and l[6:13] == envs + ['R']
             and l[-1] == 'X' and len(t) > 5 and t == sorted(t),
             f'tocar: o mapa de pinos de novo, o envelope de cada canal, R, {len(t)} notas em ordem, X')
+    forcas = [x.split() for x in l if x.startswith('N ')]
+    confere(not pg.is_checked('#envArco') and all(e.endswith(' 4 0 1000 6') for e in envs) and all(x[4] == '1000' for x in forcas),
+            f'"envelope no arco" desligado (o padrão): nota reta e no máximo ({envs[:1]}, {forcas[0]})')
+    pg.check('#envArco')
+    pg.evaluate('window.__serial.bytes = ""')
+    pg.click('#play'); time.sleep(1.2); pg.click('#play'); time.sleep(.2)
+    l = linhas()
+    envs = [x for x in l if x.startswith('E ')]
     env_js = pg.evaluate("[0,1,2,3,4,5].map(c => { const e = envOf(c); return 'E ' + c + ' 4 ' + (e ? Math.round(e.tau * 1000) : 0) + ' ' + (e ? Math.round(e.sus * 1000) : 1000) + ' 6'; })")
     confere(envs == env_js, f'o "E" de cada canal é o envelope do mixer ({envs[:2]})')
     forcas = [x.split() for x in l if x.startswith('N ')]
@@ -363,7 +416,60 @@ def serial(nav, base):
     confere(canais and canais <= {0, 1}, f'com dois flybacks a serial continua, só nos canais 0 e 1 ({sorted(canais)})')
     pg.click('#serGo'); time.sleep(.2)
     confere(pg.evaluate('window.__serial.fechada'), 'desconectar fecha a porta')
+    # o ESP parado no modo de gravação: a porta abre, mas ninguém responde ao "?"
+    pg.evaluate('window.__serial.mudo = true')
+    pg.click('#serGo'); time.sleep(2.8)
+    confere('não respondeu' in pg.inner_text('#serMsg'), f'sem resposta do ESP, a página avisa ({pg.inner_text("#serMsg")!r})')
+    pg.click('#serGo'); time.sleep(.2)
     confere(not erros, 'nenhum erro na página')
+    pg.close()
+
+
+def bluetooth(nav, base):
+    print('Bluetooth (BLE), com ESP simulado')
+    pg = nav.new_page(viewport={'width': 1600, 'height': 1000})
+    erros = []
+    pg.on('pageerror', lambda e: erros.append(str(e)))
+    pg.add_init_script(BLE_FALSO)
+    pg.goto(base)
+    pg.evaluate("localStorage.clear(); localStorage.setItem('flyback:esp', JSON.stringify({n: 6}))")
+    abrir(pg, base, 'exemplos/Korobeiniki.mid')
+    linhas = lambda: pg.evaluate('window.__ble.bytes').splitlines()
+    pg.select_option('#via', 'ble')
+    confere(not pg.is_visible('#baud') and pg.evaluate("JSON.parse(localStorage.getItem('flyback:esp')).via") == 'ble',
+            'escolher Bluetooth esconde a velocidade e fica lembrado')
+    pg.click('#serGo'); time.sleep(.6)
+    f = pg.evaluate('window.__ble.filtros')
+    confere(any('6e400001-b5a3-f393-e0a9-e50e24dcca9e' in (x.get('services') or []) for x in f['filters']),
+            'procura o serviço UART da Nordic')
+    confere(linhas()[:8] == ['?', 'X', 'P 0 4', 'P 1 5', 'P 2 6', 'P 3 7', 'P 4 15', 'P 5 16'], 'ao conectar: ?, X e os seis pinos, pelo Bluetooth')
+    confere('Bluetooth · Flyback ESP32 · nov/2026' in pg.inner_text('#serMsg'), f'o estado diz Bluetooth, o nome e a versão ({pg.inner_text("#serMsg")!r})')
+    pg.click('#pinos .pino:nth-child(2) button'); time.sleep(.3)
+    confere(linhas()[-4:] == ['E 1 4 0 1000 6', 'R', 'N 1 0 440.00', 'F 1 600'], '"testar" funciona pelo Bluetooth')
+    pg.click('#play'); time.sleep(1.5); pg.click('#play'); time.sleep(.4)
+    l = linhas()
+    t = [int(x.split()[2]) for x in l if x.startswith('N ') and x != 'N 1 0 440.00']
+    confere(len(t) > 5 and t == sorted(t) and l[-1] == 'X', f'tocar: {len(t)} notas em ordem, inteiras, e X no fim')
+    b = pg.evaluate('window.__ble')
+    confere(b['maxNoAr'] == 1, f'uma escrita por vez ({b["maxNoAr"]} no ar ao mesmo tempo)')
+    confere(b['grande'] == 0 and max(b['escritas'][:3]) <= 20 and max(b['escritas']) > 20,
+            f'pedaços de 20 bytes até o ESP dizer o MTU, maiores depois (maior: {max(b["escritas"])})')
+    pg.evaluate('window.__ble.cair()'); time.sleep(.2)
+    confere(pg.inner_text('#serMsg') == 'o Bluetooth caiu' and pg.inner_text('#serGo') == 'Conectar' and not pg.is_disabled('#via'),
+            'a queda do Bluetooth aparece, e dá para conectar de novo')
+    confere(not erros, f'nenhum erro na página {erros[:2]}')
+    # o gerador de tom herda a escolha do player (flyback:esp) e manda o "D" pelo Bluetooth
+    pg.goto(base + 'tom.html')
+    pg.click('#modoEsp')
+    confere(pg.input_value('#via') == 'ble' and not pg.is_visible('#baud'), 'o gerador de tom herda o Bluetooth escolhido no player')
+    pg.click('#serGo'); time.sleep(.5)
+    pg.evaluate("ch[0].ganho = 100; mostrarTudo()")
+    pg.click('#play'); time.sleep(1.3); pg.click('#play'); time.sleep(.3)
+    l = linhas()
+    confere(l[:2] == ['?', 'X'] and 'P 0 4' in l and l.count('D 0 500 440.00') >= 2 and l[-1] == 'D 0 0 440.00',
+            f'gerador de tom pelo Bluetooth: pino, o "D" repetido e fração 0 ao parar ({l.count("D 0 500 440.00")} D)')
+    confere('Bluetooth · Flyback ESP32 · nov/2026' in pg.inner_text('#serMsg'), 'e mostra a versão do firmware')
+    confere(not erros, f'nenhum erro no gerador de tom {erros[:2]}')
     pg.close()
 
 
@@ -373,7 +479,7 @@ def tom(nav, base):
     erros = []
     pg.on('pageerror', lambda e: erros.append(str(e)))
     pg.add_init_script(SERIAL_FALSA)
-    linhas = lambda: pg.evaluate('window.__serial.bytes').splitlines()
+    linhas = lambda: [x for x in pg.evaluate('window.__serial.bytes').splitlines() if x != '?']
     # sem nada salvo, os pinos padrão do player: o tom saía no GPIO 18 e a música no 4
     pg.goto(base + 'tom.html'); pg.evaluate('localStorage.clear()'); pg.goto(base + 'tom.html')
     pg.click('#modoEsp'); pg.click('#serGo'); time.sleep(.3)
@@ -401,8 +507,12 @@ def tom(nav, base):
     confere(not pg.is_visible('#on1') and not pg.is_visible('#g1') and caixa('#cv')['x'] > caixa('#gpio')['x'] + caixa('#gpio')['width'],
             'pelo ESP um canal só: a saída e os controles à esquerda, o osciloscópio à direita')
     pg.select_option('#gpio', '21'); time.sleep(.2)
-    confere(linhas()[-7:-5] == ['P 0 21', 'P 1 -1'] and linhas()[-1] == 'D 0 500 440.00',
-            'trocar o pino muda o canal de GPIO (o firmware apaga o antigo) e o tom segue')
+    # pelo índice, e não pela posição no fim: o "D" de manutenção (a cada 500 ms) pode cair depois
+    l = linhas()
+    i = len(l) - 1 - l[::-1].index('P 0 21') if 'P 0 21' in l else -1
+    confere(i >= 0 and l[i + 1:i + 7] == ['P 1 -1', 'P 2 -1', 'P 3 -1', 'P 4 -1', 'P 5 -1', 'D 0 500 440.00']
+            and l[-1] == 'D 0 500 440.00',
+            f'trocar o pino muda o canal de GPIO (o firmware apaga o antigo) e o tom segue ({l[-8:]})')
     pg.click('#play'); time.sleep(.3)
     confere(linhas()[-1] == 'D 0 0 440.00', 'parar manda fração 0')
     confere(caixa('#play')['y'] > caixa('#cv')['y'] + caixa('#cv')['height'] and caixa('#g0')['x'] > caixa('#play')['x'],
@@ -440,6 +550,7 @@ def main():
                 sys.exit('não achei Chrome nem Edge instalados')
             player(nav, base, args.telas)
             serial(nav, base)
+            bluetooth(nav, base)
             tom(nav, base)
             nav.close()
     finally:

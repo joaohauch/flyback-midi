@@ -175,7 +175,7 @@ body.esp .boxes{grid-template-columns:repeat(2,1fr)}
     <h2>Saída</h2>
     <div class="btns" role="group" aria-label="Para onde vai o tom">
       <button id="modoAudio" aria-pressed="true">saída de áudio (P2)</button>
-      <button id="modoEsp" aria-pressed="false">ESP32 pela serial</button>
+      <button id="modoEsp" aria-pressed="false">ESP32 (USB ou Bluetooth)</button>
     </div>
     <p class="note-line" id="saidaTxt"></p>
     <div id="espBloco" class="hide">
@@ -183,8 +183,9 @@ body.esp .boxes{grid-template-columns:repeat(2,1fr)}
         <label>Placa <select id="placa" aria-label="Placa"><option value="esp32">ESP32</option><option value="s3">ESP32-S3</option></select></label>
       </div>
       <div class="linha">
+        <select id="via" aria-label="Como conectar ao ESP32" title="USB: o cabo no computador. Bluetooth: sem fio, no computador ou no Chrome do Android."><option value="usb">USB</option><option value="ble">Bluetooth</option></select>
         <select id="baud" aria-label="Velocidade da serial"></select>
-        <button id="serGo">Conectar ESP32</button>
+        <button id="serGo">Conectar</button>
         <span id="serMsg">desconectado</span>
       </div>
       <div class="linha">
@@ -323,7 +324,7 @@ body.esp .boxes{grid-template-columns:repeat(2,1fr)}
 
   <div class="tip">
     <p class="soAudio"><strong>Onda quadrada é o timbre real do arco.</strong> O comparador do driver quadrateia o sinal de qualquer jeito, então senoide e triangular servem para medir e comparar, não para prever como vai soar. Para ouvir o que o flyback vai fazer, deixe em quadrada.</p>
-    <p><strong>Placa V3.6: use "ESP32 pela serial".</strong> A nota entra por um 6N136, uma entrada lógica que a saída de áudio não aciona. Pelo ESP o tom vai para uma saída por vez, a escolhida, e é sempre quadrado, e o volume vira a fração de cada período em que o arco fica aberto: 100% dá 50%, o máximo do arco (o volume segue sen(π·fração)). Com a página parada ou fechada, o ESP apaga o arco sozinho em 2 s.</p>
+    <p><strong>Placa V3.6: use "ESP32 (USB ou Bluetooth)".</strong> A nota entra por um 6N136, uma entrada lógica que a saída de áudio não aciona. Pelo ESP o tom vai para uma saída por vez, a escolhida, e é sempre quadrado, e o volume vira a fração de cada período em que o arco fica aberto: 100% dá 50%, o máximo do arco (o volume segue sen(π·fração)). Com a página parada ou fechada, o ESP apaga o arco sozinho em 2 s.</p>
     <p class="soAudio"><strong>Cada canal vai para um flyback.</strong> A separação é dura, por <code>ChannelMergerNode</code>: o lado desligado sai com amostra zero, sem vazamento de um driver para o outro.</p>
     <p><strong>Acima de uns 5 kHz o arco perde corpo</strong> e vira sopro. Uma varredura de 50 Hz a 2 kHz costuma cobrir a região onde o par rende mais.</p>
   </div>
@@ -509,11 +510,14 @@ const BAUDS = [115200, 230400, 460800, 921600];
 /* sem nada salvo, o mesmo padrão do player (ESP32-S3, canal 1 no GPIO 4): aqui era o ESP32 comum, e
    quem nunca mexeu no painel tinha a música no GPIO 4 e o tom no 18 — o dono do projeto via o LED da
    serial piscar e nada sair no pino 4 */
+/* como conectar: 'usb' (Web Serial) ou 'ble' (Web Bluetooth), a mesma escolha do player */
+const temVia = v => v === 'usb' ? 'serial' in navigator : v === 'ble' && !!navigator.bluetooth;
 function espCfg(){
   const e = store.get('esp') || {};
   const placa = PLACAS[e.placa] ? e.placa : 's3';
   const pinos = Array.isArray(e.pinos) && e.pinos.length === 6 && e.pinos.every(g => PLACAS[placa].pinos.includes(+g)) ? e.pinos.map(Number) : PLACAS[placa].padrao.slice();
-  return { placa, pinos, baud: BAUDS.includes(+e.baud) ? +e.baud : 115200 };
+  return { placa, pinos, baud: BAUDS.includes(+e.baud) ? +e.baud : 115200,
+           via: temVia(e.via) ? e.via : temVia('usb') ? 'usb' : 'ble' };
 }
 /* o GPIO do tom: o escolhido aqui, se a placa o tem; senão o do canal 1 do player */
 const pinoTom = () => { const c = espCfg(); return PLACAS[c.placa].pinos.includes(pino) ? pino : c.pinos[0]; };
@@ -524,14 +528,133 @@ function salvarPlaca(placa){
   pino = PLACAS[placa].padrao[0];
   mostrarSaida(); pinos(); enviar(true); guardar();
 }
-const ser = { port: null, writer: null, enc: new TextEncoder(), timer: 0, ult: 0, fila: 0, enviado: '' };
-function serialWrite(l){ if (ser.writer) ser.writer.write(ser.enc.encode(l + '\n')).catch(() => fechar(true)); }
+/* ---------- conexão com o ESP32: USB (Web Serial) ou Bluetooth (Web Bluetooth) ----------
+   O mesmo código do index.html (lá está explicado): pelo Bluetooth, o serviço UART da Nordic que
+   o firmware anuncia como "Flyback ESP32", com as linhas em fila e em pedaços de MTU − 3 bytes. */
+const NUS = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const NUS_RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';   /* a página escreve */
+const NUS_TX = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';   /* o ESP notifica */
+const TEM = { usb: 'serial' in navigator, ble: !!navigator.bluetooth };
+function novoElo(aoLer, aoCair){
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const e = { via: null, nome: '', mtu: 23 };
+  let port = null, writer = null, leitor = null, leitura = null, dev = null, rx = null, fila = '', drenando = false, resto = '', aoPronto = null;
+  const recebe = txt => {
+    resto += txt;
+    for (let i; (i = resto.indexOf('\n')) >= 0; ){
+      const l = resto.slice(0, i).replace(/\r$/, '');
+      resto = resto.slice(i + 1);
+      const m = / mtu (\d+)/.exec(l);
+      if (m && e.via === 'ble') e.mtu = +m[1];
+      if (aoPronto && l.includes('flyback-esp32 pronto')) aoPronto();
+      if (l) aoLer(l);
+    }
+    if (resto.length > 2000) resto = '';
+  };
+  /* conversor USB (CH343, CP210x): soltar o GPIO 0 e um pulso no EN, para o ESP não reiniciar em
+     modo de gravação ao abrir a porta; na USB nativa (VID 303A) não mexe — ver index.html */
+  async function reiniciaLimpo(p){
+    const info = p.getInfo ? p.getInfo() : {};
+    if (info.usbVendorId === 0x303a || !p.setSignals) return false;
+    try {
+      await p.setSignals({ dataTerminalReady: false, requestToSend: true });
+      await new Promise(ok => setTimeout(ok, 100));
+      await p.setSignals({ dataTerminalReady: false, requestToSend: false });
+      return true;
+    } catch (err) { return false; }
+  }
+  async function drena(){
+    if (drenando) return;
+    drenando = true;
+    while (fila && rx){
+      const c = rx, n = Math.max(20, Math.min(e.mtu - 3, 240)), dados = enc.encode(fila.slice(0, n));
+      fila = fila.slice(n);
+      try { await (c.writeValueWithoutResponse ? c.writeValueWithoutResponse(dados) : c.writeValue(dados)); }
+      catch (err) { if (!dev || !dev.gatt.connected){ drenando = false; fecha(true); return; } }
+    }
+    drenando = false;
+  }
+  async function leUSB(p){
+    while (port === p && p.readable){
+      const r = leitor = p.readable.getReader();
+      let fim = false;
+      try { for (;;){ const { value, done } = await r.read(); if (done){ fim = true; break; } recebe(dec.decode(value, { stream: true })); } }
+      catch (err) {}
+      finally { try { r.releaseLock(); } catch (err) {} }
+      if (fim) break;
+    }
+  }
+  async function fecha(caiu){
+    if (!e.via) return;
+    const via = e.via, p = port, w = writer, r = leitor, l = leitura, d = dev, c = rx;
+    e.via = null; port = writer = leitor = leitura = dev = rx = null; fila = ''; resto = '';
+    if (via === 'usb'){
+      try { if (w){ if (!caiu) await w.write(enc.encode('X\n')); w.releaseLock(); } } catch (err) {}
+      try { if (r) await r.cancel(); } catch (err) {}
+      try { await l; } catch (err) {}
+      try { if (p) await p.close(); } catch (err) {}
+    } else {
+      for (let k = 0; drenando && k < 20; k++) await new Promise(ok => setTimeout(ok, 15));
+      try { if (c && !caiu) await c.writeValueWithoutResponse(enc.encode('X\n')); } catch (err) {}
+      try { if (d && d.gatt.connected) d.gatt.disconnect(); } catch (err) {}
+    }
+    aoCair(caiu);
+  }
+  e.fecha = fecha;
+  e.ativo = () => !!(writer || rx);
+  e.escreve = l => {
+    if (writer) writer.write(enc.encode(l + '\n')).catch(() => fecha(true));
+    else if (rx){ fila += l + '\n'; drena(); }
+  };
+  e.abre = async (via, baud) => {
+    if (e.via) await fecha(false);
+    if (via === 'usb'){
+      const p = await navigator.serial.requestPort();
+      await p.open({ baudRate: baud });
+      const pronto = new Promise(ok => { aoPronto = ok; setTimeout(ok, 2000); });
+      port = p; writer = p.writable.getWriter(); e.nome = 'USB'; e.via = 'usb';
+      leitura = leUSB(p);
+      if (await reiniciaLimpo(p)) await pronto;
+      aoPronto = null;
+    } else {
+      const d = await navigator.bluetooth.requestDevice({ filters: [{ services: [NUS] }, { namePrefix: 'Flyback' }], optionalServices: [NUS] });
+      d.addEventListener('gattserverdisconnected', () => { if (dev === d) fecha(true); });
+      try {
+        const s = await (await d.gatt.connect()).getPrimaryService(NUS);
+        const c = await s.getCharacteristic(NUS_RX), t = await s.getCharacteristic(NUS_TX);
+        const dt = new TextDecoder();
+        t.addEventListener('characteristicvaluechanged', ev => recebe(dt.decode(ev.target.value, { stream: true })));
+        await t.startNotifications();
+        dev = d; rx = c; e.mtu = 23; e.nome = d.name || 'ESP32'; e.via = 'ble';
+      } catch (err) { try { d.gatt.disconnect(); } catch (_) {} throw err; }
+    }
+    e.escreve('?');      /* a resposta diz a versão do firmware e, pelo Bluetooth, o MTU */
+  };
+  if (TEM.usb) navigator.serial.addEventListener('disconnect', ev => { if (ev.target === port) fecha(true); });
+  return e;
+}
+const versaoDe = l => { const m = /^(?:flyback-esp32 pronto · )?(.+?) · lógica /.exec(l); return m ? m[1] : null; };
+
+const ser = { timer: 0, ult: 0, fila: 0, enviado: '' };
+let respondeu = false;
+const elo = novoElo(l => {
+  respondeu = true;
+  const v = versaoDe(l);
+  if (v && elo.via){ $('serMsg').textContent = estadoElo() + ' · ' + v.split(' · ')[0]; $('serMsg').title = l; }
+}, caiu => {
+  clearInterval(ser.timer); ser.timer = 0; clearTimeout(ser.fila);
+  mostrarVia();
+  $('serMsg').textContent = caiu ? (espCfg().via === 'ble' ? 'o Bluetooth caiu' : 'a porta serial caiu') : 'desconectado';
+  $('serMsg').title = '';
+});
+const estadoElo = () => elo.via === 'ble' ? 'Bluetooth · ' + elo.nome : 'USB · ' + $('baud').value;
+function serialWrite(l){ elo.escreve(l); }
 const abertoDe = i => Math.round(1000 * Math.asin(Math.min(1, ch[i].ganho / 100)) / Math.PI);
 const abertoAgora = () => tocando ? abertoDe(0) : 0;
 const linhaD = () => 'D 0 ' + abertoAgora() + ' ' + ch[0].f.toFixed(2);
 /* o "D", no máximo de 40 em 40 ms: a varredura e o arrasto do slider mexem a cada quadro */
 function enviar(ja){
-  if (saida !== 'esp' || !ser.writer) return;
+  if (saida !== 'esp' || !elo.ativo()) return;
   const l = linhaD();
   if (!ja && l === ser.enviado) return;
   const espera = 40 - (performance.now() - ser.ult);
@@ -545,29 +668,38 @@ function manter(){ if (abertoAgora() > 0) enviar(true); }
    punha, com a placa no padrão ESP32-S3, os canais 3 e 4 nos GPIO 6 e 7 — num ESP32 comum, pinos da
    memória flash: o ESP travava e a serial caía poucos segundos depois de o tom começar. */
 function pinos(){
-  if (saida !== 'esp' || !ser.writer) return;
+  if (saida !== 'esp' || !elo.ativo()) return;
   for (let c = 0; c < 6; c++) serialWrite('P ' + c + ' ' + (c ? -1 : pinoTom()));
 }
 async function conectar(){
-  if (ser.port) return fechar(false);
+  if (elo.via) return elo.fecha(false);
+  const via = espCfg().via;
+  $('serMsg').textContent = via === 'ble' ? 'procurando…' : 'escolha a porta…';
   try {
-    const port = await navigator.serial.requestPort();
-    await port.open({ baudRate: +$('baud').value });
-    ser.port = port; ser.writer = port.writable.getWriter(); ser.enviado = '';
+    respondeu = false;
+    await elo.abre(via, +$('baud').value);
+    ser.enviado = '';
     serialWrite('X'); pinos();
     ser.timer = setInterval(manter, 500);
     enviar(true);
-    $('serGo').textContent = 'Desconectar'; $('baud').disabled = true;
-    $('serMsg').textContent = 'conectado a ' + $('baud').value + ' baud';
-  } catch (e) { if (e && e.name !== 'NotFoundError') $('serMsg').textContent = 'não conectou: ' + e.message; }
+    mostrarVia();
+    $('serMsg').textContent = estadoElo();
+    /* porta aberta não é firmware rodando (o ESP pode estar no modo de gravação): ver index.html */
+    setTimeout(() => {
+      if (elo.via && !respondeu) $('serMsg').textContent = estadoElo() + ' · o ESP não respondeu: aperte o RESET (EN) da placa e conecte de novo';
+    }, 2500);
+  } catch (e) {
+    mostrarVia();
+    $('serMsg').textContent = !e || e.name === 'NotFoundError' ? 'desconectado' : 'não conectou: ' + e.message;
+  }
 }
-async function fechar(caiu){
-  clearInterval(ser.timer); ser.timer = 0; clearTimeout(ser.fila);
-  const { port, writer } = ser; ser.port = ser.writer = null;
-  try { if (writer){ if (!caiu) await writer.write(ser.enc.encode('X\n')); writer.releaseLock(); } } catch (e) {}
-  try { if (port) await port.close(); } catch (e) {}
-  $('serGo').textContent = 'Conectar ESP32'; $('baud').disabled = false;
-  $('serMsg').textContent = caiu ? 'a porta serial caiu' : 'desconectado';
+/* a escolha USB/Bluetooth fica com a placa, em flyback:esp, e vale também no player */
+function mostrarVia(){
+  const via = espCfg().via, ligado = !!elo.via;
+  $('via').value = via; $('via').disabled = ligado;
+  $('baud').classList.toggle('hide', via !== 'usb'); $('baud').disabled = ligado;
+  $('serGo').textContent = ligado ? 'Desconectar' : 'Conectar';
+  $('serGo').disabled = !ligado && !TEM[via];
 }
 function mostrarSaida(){
   const esp = saida === 'esp', c = espCfg();
@@ -594,7 +726,7 @@ function escolherPino(g){
 }
 function mudarSaida(m){
   if (m === saida) return;
-  if (saida === 'esp' && ser.writer) serialWrite('X');     /* saindo do ESP: o arco apaga já */
+  if (saida === 'esp' && elo.ativo()) serialWrite('X');     /* saindo do ESP: o arco apaga já */
   saida = m;
   if (actx) for (let i = 0; i < N; i++) aplicarGanho(i);
   if (m === 'esp') enviar(true);
@@ -729,14 +861,19 @@ $('gpio').addEventListener('change', e => escolherPino(+e.target.value));
 $('modoAudio').addEventListener('click', () => mudarSaida('audio'));
 $('modoEsp').addEventListener('click', () => mudarSaida('esp'));
 $('monitorTom').addEventListener('change', e => { monitor = e.target.checked; if (actx) for (let i = 0; i < N; i++) aplicarGanho(i); guardar(); });
-if ('serial' in navigator){
-  $('serGo').addEventListener('click', conectar);
-  navigator.serial.addEventListener('disconnect', e => { if (e.target === ser.port) fechar(true); });
-} else {
-  $('serGo').disabled = true; $('baud').disabled = true;
-  $('serMsg').textContent = 'este navegador não tem Web Serial: use Chrome ou Edge';
-}
-addEventListener('pagehide', () => { if (ser.writer) serialWrite('X'); });
+$('serGo').addEventListener('click', conectar);
+['usb', 'ble'].forEach(v => {
+  const o = $('via').querySelector('option[value="' + v + '"]');
+  o.disabled = !TEM[v];
+  if (!TEM[v]) o.textContent += ' (sem suporte aqui)';
+});
+$('via').addEventListener('change', e => {
+  store.set('esp', Object.assign(store.get('esp') || {}, { via: e.target.value }));
+  mostrarVia(); $('serMsg').textContent = 'desconectado';
+});
+mostrarVia();
+if (!TEM.usb && !TEM.ble) $('serMsg').textContent = 'este navegador não tem Web Serial nem Web Bluetooth: use Chrome ou Edge; no celular, o Chrome do Android';
+addEventListener('pagehide', () => { if (elo.ativo()) serialWrite('X'); });
 $('sdur').addEventListener('input', e => { $('sdurv').textContent = e.target.value + ' s'; });
 $('swp').addEventListener('click', () => varrer(!varrendo));
 $('swpv').addEventListener('click', () => {

@@ -7,6 +7,36 @@ bancada ler depois do `git pull`. O passo a passo de gravar e testar continua em
 
 **Antes de testar:** `git pull` e grave o firmware de novo (passos 2 a 4 do roteiro). O firmware
 de nov/2026 é o primeiro com envelope e força nas notas; o boot e o `?` dizem `nov/2026 · envelope`.
+Desde 25/nov, `nov/2026 · envelope · bluetooth`.
+
+## 25/nov — Bluetooth, e o ESP32-S3 na bancada
+
+Feito no computador da bancada, com o ESP32-S3 no USB. Resultados em `docs/bancada-esp32.md`.
+
+- **O que mudou:** a conexão com o ESP passa a ser **USB ou Bluetooth**, escolhida num seletor ao
+  lado do Conectar, no player e no gerador de tom (a escolha fica em `flyback:esp`, com a placa).
+  O Bluetooth é BLE com o serviço UART da Nordic: Chrome e Edge no computador e Chrome no Android
+  (o celular não tem Web Serial, então lá o padrão é o Bluetooth). O protocolo é o mesmo, linha a
+  linha; detalhes em `docs/protocolo-serial.md`, "Transporte". Sem o cabo, também some a
+  interferência do flyback pela USB, que derrubava a serial.
+- **Firmware:** ouve a USB, a UART0 (a segunda entrada USB das DevKit S3, pelo CH343) e o
+  Bluetooth ao mesmo tempo, e responde pelos três. Se cai o Bluetooth de quem estava tocando,
+  silencia na hora. O `?` diz o estado do Bluetooth e o MTU, que a página usa para o tamanho dos
+  pacotes (20 bytes até negociar).
+- **A página lê o que o ESP responde:** pergunta `?` ao conectar e mostra a versão do firmware ao
+  lado do estado (`USB · 115200 · nov/2026`); as respostas aparecem em "Linhas enviadas", com ←.
+- **Botão BOOT só vale apertado por 80 ms**, e a página e o `testar_serial.py` reiniciam o ESP
+  limpo ao abrir a porta do CH343: abrir com DTR e RTS ligados chegou a ligar o tom de teste
+  sozinho e a deixar o S3 em modo de gravação.
+- **Envelope medido na placa** (no pino, sem potência): bate com a conta, ver a tabela em
+  Resultados.
+- **"Envelope no arco" virou opção**, ao lado de "ouvir no computador", desligada por padrão:
+  desligada, a nota sai inteira no máximo, como antes do envelope.
+- **A serial voltou a cair com o arco tocando**, agora pela USB nativa: o mais provável é a
+  interferência de sempre (o notebook perto do flyback). O Bluetooth tira o cabo do caminho.
+- **S3:** compilar com `CDCOnBoot=cdc` (passo 2 do roteiro), senão nada sai pela USB nativa.
+- **A medir ainda:** o Bluetooth de verdade (o notebook da bancada não tem adaptador) e, com a
+  potência, abaixo de que fração o arco deixa de soar.
 
 ## nov/2026 — envelope e força no arco
 

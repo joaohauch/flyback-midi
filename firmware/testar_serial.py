@@ -31,7 +31,22 @@ def main():
     ap.add_argument('--canais', type=int, default=2)
     a = ap.parse_args()
 
-    s = serial.Serial(a.porta, a.baud, timeout=0.1)
+    # Abre sem ligar o DTR e o RTS e reinicia com um pulso só no RTS. Nas placas com conversor USB
+    # (CH343, CP210x) os dois vão ao GPIO 0 e ao EN, e abrir do jeito padrão do pyserial chegou a
+    # reiniciar o S3 em modo de gravação ("waiting for download") e, de outra vez, a apertar o BOOT
+    # (o tom de teste ligou). Com o GPIO 0 solto o boot é sempre o normal. Na USB nativa do ESP
+    # (VID 303A) o RTS reinicia o chip e derruba a porta: lá não mexe, e o teste segue sem o boot.
+    from serial.tools import list_ports
+    nativa = any(p.device == a.porta and p.vid == 0x303A for p in list_ports.comports())
+    s = serial.Serial()
+    s.port, s.baudrate, s.timeout = a.porta, a.baud, 0.1
+    s.dtr = False
+    s.rts = False
+    s.open()
+    if not nativa:
+        s.rts = True
+        time.sleep(0.1)
+        s.rts = False
 
     def le(seg):
         fim, out = time.time() + seg, b''

@@ -1,14 +1,16 @@
 /*
   flyback-esp32 — o firmware dos flybacks para o site flyback-midi.
 
-  Recebe pela serial o protocolo de docs/protocolo-serial.md (P, E, R, N, F, X, D e ?) e toca cada
-  canal como onda quadrada na frequência da nota, num GPIO que interrompe o oscilador do flyback.
+  Recebe o protocolo de docs/protocolo-serial.md (P, E, R, N, F, X, D e ?) pela USB ou pelo
+  Bluetooth (BLE), os dois ao mesmo tempo, e toca cada canal como onda quadrada na frequência da
+  nota, num GPIO que interrompe o oscilador do flyback.
   O volume da nota — força (velocity) e envelope (ataque, decaimento, sustentação, soltura) — sai
   pela fração do período em que o arco fica aberto, recalculada a cada 1 ms (ver ENVELOPE abaixo).
   Sem computador, o botão BOOT liga e desliga um tom de teste de 440 Hz no GPIO 4 (ver TESTE_*).
 
-  Testado com: ESP32 comum ("ESP32 Dev Module" no Arduino). Compila também para o ESP32-S3,
-  mas lá só os canais 1 a 4 tocam — ver CANAIS abaixo.
+  Placas: ESP32 comum ("ESP32 Dev Module" no Arduino) e ESP32-S3 (lá só os canais 1 a 4 tocam —
+  ver CANAIS abaixo). O comando de compilar de cada uma está em docs/bancada-esp32.md: o S3 precisa
+  de "USB CDC On Boot" ligado (CDCOnBoot=cdc), senão a serial não sai pela USB nativa.
 
   Antes de gravar, confira LOGICA_INVERTIDA para o seu circuito.
 */
@@ -16,9 +18,17 @@
 #include "driver/ledc.h"
 #include "esp_system.h"
 #include <math.h>
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLE2902.h>
+#include "freertos/stream_buffer.h"
+
+#if CONFIG_IDF_TARGET_ESP32S3 && ARDUINO_USB_MODE && !ARDUINO_USB_CDC_ON_BOOT
+#warning "ESP32-S3 sem USB CDC On Boot: a serial vai para a UART0, e nada sai pela USB nativa. Compile com CDCOnBoot=cdc."
+#endif
 
 // Aparece no boot e no "?": para saber, pelo monitor serial, qual versão está gravada na placa.
-const char *VERSAO = "nov/2026 · envelope";
+const char *VERSAO = "nov/2026 · envelope · bluetooth";
 
 // ------------------------------------------------------------------ ajuste para o seu circuito
 
@@ -32,6 +42,11 @@ const char *VERSAO = "nov/2026 · envelope";
 const bool LOGICA_INVERTIDA = false;
 
 const uint32_t BAUD = 115200;        // o mesmo escolhido na página (115200 é o padrão dela)
+
+// Bluetooth: o nome que aparece na lista do navegador ao conectar. A página procura pelo serviço
+// (o UART da Nordic, abaixo) e por nome começando com "Flyback"; para duas placas na mesma sala,
+// dê um nome a cada uma, mantendo o começo.
+const char *NOME_BLE = "Flyback ESP32";
 
 // Pinos de cada canal até a página mandar o mapa ("P c g"). São os padrões da página, para o
 // firmware já funcionar se as primeiras linhas se perderem: muitas placas reiniciam quando a
@@ -58,6 +73,111 @@ const int TESTE_BOTAO = 0;           // BOOT, no ESP32 comum e no S3
 const int TESTE_PINO = 4;
 const float TESTE_HZ = 440.0;
 const uint32_t TESTE_MAX_MS = 120000;
+
+// ------------------------------------------------------------------ USB e Bluetooth
+// O mesmo protocolo de linhas chega por três caminhos, e cada um tem a sua linha em montagem:
+// - a USB do "Serial" — no S3, a USB nativa (USB-Serial/JTAG); no ESP32 comum, o conversor
+//   CP210x/CH340 da placa;
+// - no S3 com CDC On Boot, também a UART0 (Serial0), que é a outra entrada USB das DevKit com duas
+//   (a do CH343): funciona em qualquer das duas;
+// - o Bluetooth (BLE), pelo serviço UART da Nordic (NUS): a página escreve no RX e lê o TX por
+//   notificação. É o Web Bluetooth do Chrome e do Edge no computador e do Chrome no Android. O S3
+//   só tem BLE; o ESP32 comum também tem o Bluetooth clássico, mas o navegador não fala com ele. Sem
+//   fio, também some o caminho da interferência do flyback pelo cabo USB, que derrubava a serial.
+// O que o firmware responde (o "?", os avisos) sai pelos três.
+#define NUS_SERVICO "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
+#define NUS_RX      "6e400002-b5a3-f393-e0a9-e50e24dcca9e"   // a página escreve aqui
+#define NUS_TX      "6e400003-b5a3-f393-e0a9-e50e24dcca9e"   // e lê daqui, por notificação
+
+enum Fonte { DA_USB, DA_UART, DO_BLE, FONTES };
+static const char *NOME_FONTE[FONTES] = {"USB", "UART", "Bluetooth"};
+static int ultimaFonte = -1;                   // quem mandou a última linha
+
+static BLEServer *bleServidor = nullptr;
+static BLECharacteristic *bleTx = nullptr;
+// O BLE entrega cada escrita numa tarefa dele; o loop lê daqui, sem disputar nada com ela.
+static StreamBufferHandle_t bleEntrada = nullptr;
+static volatile bool bleConectado = false, bleCaiu = false;
+static uint16_t bleMtu = 23;                   // 23 até o navegador negociar: 20 bytes por pacote
+static char bleSaida[1024];                    // o texto a notificar, mandado aos pedaços no loop
+static size_t bleSaidaN = 0;
+
+class AoConectar : public BLEServerCallbacks {
+  void onConnect(BLEServer *s) override { (void)s; bleConectado = true; }
+  void onDisconnect(BLEServer *s) override { (void)s; bleConectado = false; bleCaiu = true; }
+#if defined(CONFIG_BLUEDROID_ENABLED)
+  // pede intervalo de 7,5 a 15 ms: com o padrão do Android (30 a 50 ms) a nota chega mais tarde
+  void onConnect(BLEServer *s, esp_ble_gatts_cb_param_t *p) override {
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+    s->requestConnParams(p->connect.remote_bda, 6, 12, 0, 400);
+#else
+    s->updateConnParams(p->connect.remote_bda, 6, 12, 0, 400);
+#endif
+  }
+#endif
+};
+class AoEscrever : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *c) override {
+    auto v = c->getValue();                     // String no pacote 3.x, std::string no 2.x
+    if (v.length() && bleEntrada) xStreamBufferSend(bleEntrada, v.c_str(), v.length(), 0);
+  }
+};
+
+// Print que escreve nas três saídas. Na USB nativa do S3, sem a porta aberta no computador, a
+// escrita não pode esperar (setTxTimeoutMs(0) no setup): tocando pelo Bluetooth com o cabo só na
+// fonte, o loop travaria a cada linha.
+class Eco : public Print {
+public:
+  size_t write(uint8_t b) override { return write(&b, 1); }
+  size_t write(const uint8_t *p, size_t n) override {
+    Serial.write(p, n);
+#if ARDUINO_USB_CDC_ON_BOOT
+    Serial0.write(p, n);
+#endif
+    if (bleConectado) {
+      size_t cabe = sizeof(bleSaida) - bleSaidaN, m = n < cabe ? n : cabe;   // cheio: o resto se perde
+      memcpy(bleSaida + bleSaidaN, p, m);
+      bleSaidaN += m;
+    }
+    return n;
+  }
+};
+static Eco diz;
+
+static void bleInicia() {
+  bleEntrada = xStreamBufferCreate(4096, 1);
+  BLEDevice::init(NOME_BLE);
+  BLEDevice::setMTU(247);                      // aceita até 244 bytes por pacote, se o navegador pedir
+  bleServidor = BLEDevice::createServer();
+  bleServidor->setCallbacks(new AoConectar());
+  BLEService *srv = bleServidor->createService(NUS_SERVICO);
+  bleTx = srv->createCharacteristic(NUS_TX, BLECharacteristic::PROPERTY_NOTIFY);
+#if defined(CONFIG_BLUEDROID_ENABLED)
+  bleTx->addDescriptor(new BLE2902());         // no NimBLE ele vem sozinho
+#endif
+  BLECharacteristic *rx = srv->createCharacteristic(NUS_RX, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_WRITE_NR);
+  rx->setCallbacks(new AoEscrever());
+  srv->start();
+  BLEAdvertising *adv = BLEDevice::getAdvertising();
+  adv->addServiceUUID(NUS_SERVICO);
+  adv->setScanResponse(true);                  // o nome vai na resposta se não couber com o serviço
+  BLEDevice::startAdvertising();
+}
+
+// Notificações aos pedaços de MTU − 3 bytes, um a cada 5 ms: em rajada a pilha do BLE descarta.
+static void bleEnvia() {
+  static uint32_t ultimo = 0;
+  if (!bleConectado) { bleSaidaN = 0; return; }
+  if (!bleSaidaN || millis() - ultimo < 5) return;
+  ultimo = millis();
+  uint16_t m = bleServidor->getPeerMTU(bleServidor->getConnId());
+  if (m >= 23) bleMtu = m;
+  size_t n = bleSaidaN < (size_t)(bleMtu - 3) ? bleSaidaN : (size_t)(bleMtu - 3);
+  bleTx->setValue((uint8_t *)bleSaida, n);
+  bleTx->notify();
+  memmove(bleSaida, bleSaida + n, bleSaidaN - n);
+  bleSaidaN -= n;
+}
 
 // ------------------------------------------------------------------ geração do tom (LEDC)
 // Cada canal tem um timer só dele, para cada um ter a sua frequência. O ESP32 comum tem 4
@@ -228,7 +348,7 @@ static bool pinoProibido(int g) {
 static void fixaPino(int c, int g) {
   if (c < 0 || c > 5) return;
   if (g >= 0 && pinoProibido(g)) {
-    Serial.printf("canal %d: o GPIO %d não serve (flash, USB, serial, só entrada ou inexistente) — ignorado\n", c + 1, g);
+    diz.printf("canal %d: o GPIO %d não serve (flash, USB, serial, só entrada ou inexistente) — ignorado\n", c + 1, g);
     return;
   }
   Canal &k = canal[c];
@@ -240,7 +360,7 @@ static void fixaPino(int c, int g) {
   k.pino = -1; k.n = 0; k.soando = false;
   if (g < 0) return;
   if (c >= CANAIS) {
-    Serial.printf("canal %d: esta placa só tem timer para %d canais\n", c + 1, CANAIS);
+    diz.printf("canal %d: esta placa só tem timer para %d canais\n", c + 1, CANAIS);
     pinoSeguro(g);
     return;
   }
@@ -262,7 +382,7 @@ static void fixaPino(int c, int g) {
   cc.duty = SILENCIO;
   cc.hpoint = 0;
   if (ledc_timer_config(&tc) != ESP_OK || ledc_channel_config(&cc) != ESP_OK) {
-    Serial.printf("canal %d: o GPIO %d não serve de saída\n", c + 1, g);
+    diz.printf("canal %d: o GPIO %d não serve de saída\n", c + 1, g);
     return;
   }
   k.pino = g;
@@ -315,6 +435,9 @@ static const char *motivoReinicio() {
     case ESP_RST_WDT:       return "TRAVAMENTO (watchdog)";
     case ESP_RST_BROWNOUT:  return "QUEDA DE TENSÃO (brownout)";
     case ESP_RST_DEEPSLEEP: return "volta do sono";
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
+    case ESP_RST_USB:       return "reinício pela USB nativa (gravação ou porta aberta)";
+#endif
     default:                return "outro";
   }
 }
@@ -336,13 +459,17 @@ static void trata(char *s) {
                   receita(c, atk, tau, sus, rel); break; }
     case 'D': { int d; if (sscanf(s + 1, "%d %d %f", &c, &d, &f) == 3) tomDireto(c, d, f); break; }
     case '?':                                  // para conferir pelo monitor serial
-      Serial.printf("%s · lógica %s · %d canais · pinos", VERSAO, LOGICA_INVERTIDA ? "invertida" : "direta", CANAIS);
-      for (int i = 0; i < 6; i++) Serial.printf(" %d", canal[i].pino);
-      Serial.print(" · envelopes");
+      diz.printf("%s · lógica %s · %d canais · pinos", VERSAO, LOGICA_INVERTIDA ? "invertida" : "direta", CANAIS);
+      for (int i = 0; i < 6; i++) diz.printf(" %d", canal[i].pino);
+      diz.print(" · envelopes");
       for (int i = 0; i < 6; i++)
-        Serial.printf(" [%u %lu %u %u]", canal[i].atk, (unsigned long)canal[i].tau, canal[i].sus, canal[i].rel);
-      Serial.printf(" · eventos perdidos %lu · ligado há %lu s · último reinício: %s\n", (unsigned long)perdidos,
+        diz.printf(" [%u %lu %u %u]", canal[i].atk, (unsigned long)canal[i].tau, canal[i].sus, canal[i].rel);
+      diz.printf(" · eventos perdidos %lu · ligado há %lu s · último reinício: %s", (unsigned long)perdidos,
                     (unsigned long)(millis() / 1000), motivoReinicio());
+      // a página lê o "mtu N" para saber o tamanho dos pacotes que pode mandar pelo Bluetooth
+      if (bleConectado) diz.printf(" · bluetooth conectado, mtu %u", bleServidor->getPeerMTU(bleServidor->getConnId()));
+      else diz.printf(" · bluetooth anunciando \"%s\"", NOME_BLE);
+      diz.printf(" · pergunta pela %s\n", ultimaFonte >= 0 ? NOME_FONTE[ultimaFonte] : "?");
       break;
   }
 }
@@ -360,7 +487,7 @@ static void testeDesliga() {
   testeCanal = -1;
   silencia(c);
   if (testeAntes != -2 && !paginaFalou) fixaPino(c, testeAntes);
-  Serial.println("teste: desligado");
+  diz.println("teste: desligado");
 }
 
 static void testeLiga() {
@@ -373,24 +500,29 @@ static void testeLiga() {
     fixaPino(0, TESTE_PINO);
   }
   if (canal[c].pino != TESTE_PINO) {
-    Serial.printf("teste: o GPIO %d não pôde virar saída\n", TESTE_PINO);
+    diz.printf("teste: o GPIO %d não pôde virar saída\n", TESTE_PINO);
     return;
   }
   tomDireto(c, 500, TESTE_HZ);
   canal[c].diretoAte = canal[c].desde + TESTE_MAX_MS;
   testeCanal = c;
-  Serial.printf("teste: %.0f Hz no GPIO %d por até %lu s — BOOT de novo desliga\n", TESTE_HZ, TESTE_PINO,
+  diz.printf("teste: %.0f Hz no GPIO %d por até %lu s — BOOT de novo desliga\n", TESTE_HZ, TESTE_PINO,
                 (unsigned long)(TESTE_MAX_MS / 1000));
 }
 
+// O aperto só vale com o botão parado em BAIXO por 80 ms. Antes valia a primeira descida, e nas
+// placas com a segunda USB pelo CH343 (ou CP210x) o circuito de reset automático liga o DTR ao
+// GPIO 0: abrir a porta (o testar_serial.py, um monitor serial) dava um pulso curto em BAIXO, lido
+// como aperto — o tom de teste ligava no máximo, por até 2 min, sem ninguém tocar na placa. Visto
+// na bancada em 25/nov. Um dedo segura bem mais que 80 ms; o pulso do DTR, poucos ms.
 static void testeBotao() {
-  static int antes = HIGH;           // solto: o pull-up segura em ALTO
-  static uint32_t mudou = 0;
+  static int estavel = HIGH, lido = HIGH;    // solto: o pull-up segura em ALTO
+  static uint32_t desde = 0;
   int agora = digitalRead(TESTE_BOTAO);
-  if (agora != antes && millis() - mudou > 50) {     // 50 ms: o repique do botão
-    mudou = millis();
-    antes = agora;
-    if (agora == LOW) {
+  if (agora != lido) { lido = agora; desde = millis(); }
+  else if (agora != estavel && millis() - desde >= 80) {
+    estavel = agora;
+    if (estavel == LOW) {
       if (testeCanal >= 0) testeDesliga(); else testeLiga();
     }
   }
@@ -404,19 +536,51 @@ void setup() {
   if (!pinoProibido(TESTE_PINO)) pinoSeguro(TESTE_PINO);
   pinMode(TESTE_BOTAO, INPUT_PULLUP);
   Serial.begin(BAUD);
+#if ARDUINO_USB_MODE && ARDUINO_USB_CDC_ON_BOOT
+  Serial.setTxTimeoutMs(0);                    // USB nativa sem a porta aberta: não espera (ver Eco)
+#endif
+#if ARDUINO_USB_CDC_ON_BOOT
+  Serial0.begin(BAUD);
+#endif
   for (int i = 0; i < CANAIS; i++) fixaPino(i, PINOS_PADRAO[i]);
-  Serial.printf("flyback-esp32 pronto · %s · lógica %s · %d canais · reinício: %s\n", VERSAO,
-                LOGICA_INVERTIDA ? "invertida (ALTO corta o arco)" : "direta (ALTO libera o arco)", CANAIS, motivoReinicio());
+  bleInicia();
+  diz.printf("flyback-esp32 pronto · %s · lógica %s · %d canais · bluetooth \"%s\" · reinício: %s\n", VERSAO,
+                LOGICA_INVERTIDA ? "invertida (ALTO corta o arco)" : "direta (ALTO libera o arco)", CANAIS, NOME_BLE,
+                motivoReinicio());
+}
+
+// uma linha em montagem por caminho: um pedaço de linha da USB não se mistura com um do Bluetooth
+static void recebe(int fonte, char ch) {
+  static char linha[FONTES][64];
+  static int tam[FONTES] = {0};
+  if (ch == '\n') {
+    linha[fonte][tam[fonte]] = 0;
+    if (tam[fonte]) ultimaFonte = fonte;
+    trata(linha[fonte]);
+    tam[fonte] = 0;
+  } else if (ch != '\r' && tam[fonte] < (int)sizeof(linha[0]) - 1) linha[fonte][tam[fonte]++] = ch;
 }
 
 void loop() {
-  static char linha[64];
-  static int tam = 0;
-  while (Serial.available()) {
-    char ch = (char)Serial.read();
-    if (ch == '\n') { linha[tam] = 0; trata(linha); tam = 0; }
-    else if (ch != '\r' && tam < (int)sizeof(linha) - 1) linha[tam++] = ch;
+  while (Serial.available()) recebe(DA_USB, (char)Serial.read());
+#if ARDUINO_USB_CDC_ON_BOOT
+  while (Serial0.available()) recebe(DA_UART, (char)Serial0.read());
+#endif
+  char buf[128];
+  size_t n;
+  while ((n = xStreamBufferReceive(bleEntrada, buf, sizeof(buf), 0)) > 0)
+    for (size_t i = 0; i < n; i++) recebe(DO_BLE, buf[i]);
+  // Caiu o Bluetooth de quem estava tocando: silêncio já, sem esperar a fila acabar ou os 20 s da
+  // nota presa. Se quem toca é a USB, a queda de um celular conectado não a interrompe.
+  if (bleCaiu) {
+    bleCaiu = false;
+    BLEDevice::startAdvertising();             // volta a anunciar, para reconectar
+    if (ultimaFonte == DO_BLE) {
+      for (int i = 0; i < 6; i++) { silencia(i); canal[i].n = 0; }
+      diz.println("bluetooth: caiu a conexão — silêncio");
+    } else diz.println("bluetooth: desconectado");
   }
+  bleEnvia();
   executa();
   testeBotao();
 }

@@ -17,6 +17,12 @@ do passo 2.
 `N`), pela fração aberta de cada período. O `testar_serial.py` ganhou o teste de envelope. Resumo
 em `docs/atualizacoes.md`. **Grave o firmware de novo** depois do `git pull`.
 
+**Mudou em 25/nov:** conexão também pelo **Bluetooth** (BLE), no computador e no Chrome do Android,
+além da USB — o seletor fica ao lado do Conectar, no player e no gerador de tom. Na bancada a placa
+passou a ser o **ESP32-S3** (N16R8), que precisa de `CDCOnBoot=cdc` para a serial sair pela USB
+nativa (passo 2). O botão BOOT só vale apertado por 80 ms, e a página e o `testar_serial.py`
+reiniciam o ESP sem o modo de gravação ao abrir a porta do CH343. **Grave o firmware de novo.**
+
 **Mudou de novo em 16 e 21/out** — o resumo de tudo, com o porquê, está em
 `docs/atualizacoes.md`. No firmware: motivo do último reinício no `?`, pinos da flash recusados e o
 teste pelo botão BOOT, sem computador. No gerador de tom: placa e pino escolhidos na página, e só o
@@ -24,7 +30,10 @@ canal 1 configurado. **Grave o firmware de novo** depois do `git pull`.
 
 ## O teste de agora
 
-- **Placa:** ESP32 comum ("ESP32 Dev Module"; o "S1" de `hardware-decisoes.md`).
+- **Placa:** ESP32-S3 DevKit N16R8 (16 MB de flash, 8 MB de PSRAM, duas entradas USB: a nativa,
+  `USB-Serial/JTAG`, VID 303A, e a do conversor CH343), desde 25/nov. Antes, o ESP32 comum ("ESP32
+  Dev Module"; o "S1" de `hardware-decisoes.md`). O S3 só tem 4 canais (4 timers do LEDC) e só
+  Bluetooth LE — que é o que o navegador usa.
 - **Flybacks:** 2, placas de controle **V3.6** — a NOTA entra pelo optoacoplador 6N136 e
   passa pelo Q1 até o RESET do 555 monoestável (U13). As duas inversões se anulam: lógica
   **direta**, GPIO em ALTO libera o arco; BAIXO, solto, em boot ou ESP desligado, o arco fica
@@ -77,9 +86,21 @@ CP210x (Silicon Labs) ou CH340 (WCH), conforme o chip ao lado do conector.
 
 ## 2. Compilar
 
+ESP32-S3 — `CDCOnBoot=cdc` é obrigatório: sem ele a serial vai para a UART0 e nada sai pela USB
+nativa (o firmware avisa na compilação):
+
+```
+arduino-cli compile --fqbn esp32:esp32:esp32s3:CDCOnBoot=cdc firmware/flyback-esp32
+```
+
+ESP32 comum:
+
 ```
 arduino-cli compile --fqbn esp32:esp32:esp32 firmware/flyback-esp32
 ```
+
+Com o Bluetooth o programa cresce: 629 KB no S3 e 1,1 MB no ESP32 comum (84% da partição padrão
+de 1,25 MB), com o pacote 3.3.12. Compila também com o pacote 2.0.17 (o do PlatformIO).
 
 Se der erro, corrija no `.ino` e compile de novo. Pontos mais prováveis, porque dependem da versão
 do pacote: os nomes do `driver/ledc.h` (`LEDC_AUTO_CLK`, `ledc_timer_config_t`,
@@ -95,10 +116,11 @@ arduino-cli board list
 ## 4. Gravar
 
 ```
-arduino-cli upload -p COM5 --fqbn esp32:esp32:esp32 firmware/flyback-esp32
+arduino-cli upload -p COM5 --fqbn esp32:esp32:esp32s3:CDCOnBoot=cdc firmware/flyback-esp32
 ```
 
-Trocando `COM5` pela porta do passo 3. Se aparecer "Failed to connect", segure o botão BOOT da
+(No ESP32 comum, `--fqbn esp32:esp32:esp32`.) Trocando `COM5` pela porta do passo 3. No S3 grava
+por qualquer das duas entradas USB, e o firmware ouve as duas. Se aparecer "Failed to connect", segure o botão BOOT da
 placa enquanto o upload começa.
 
 ## 5. Testar pela serial, sem o site
@@ -132,7 +154,9 @@ e depois `R`, `N 0 0 220.00`, `F 0 2000`; força: `N 0 0 220.00 300`.
 ## 7. Pelo site
 
 1. Chrome ou Edge, em https://joaohauch.github.io/flyback-midi/
-2. Painel de saída: **Flybacks 2**, **Placa ESP32**, pinos 18 e 19, 115200, **Conectar ESP32**.
+2. Painel de saída: **Flybacks 2**, **Placa** (a da bancada), pinos, **USB**, 115200, **Conectar**.
+   Ao lado do botão aparece `USB · 115200 · nov/2026` — a versão vem da resposta do ESP; sem ela,
+   o ESP não respondeu (firmware antigo, ou compilado sem `CDCOnBoot=cdc`).
 3. "testar" em cada canal: um lá de 0,6 s.
 4. Abrir uma música e tocar. Com 2 flybacks a serial manda só os canais 1 e 2. Com o painel
    "Linhas enviadas" aberto, cada canal recebe um `E` antes do `R`, e cada `N` traz a força no
@@ -146,6 +170,20 @@ e depois `R`, `N 0 0 220.00`, `F 0 2000`; força: `N 0 0 220.00 300`.
    desenha o pulso. O volume vira a fração aberta ("aberto 50%" no volume máximo; menos volume,
    pulso mais estreito). Trocar o pino move o tom e apaga o anterior. Fechar a aba com o tom
    tocando: o ESP apaga em 2 s.
+
+## 7b. Pelo Bluetooth
+
+1. Desconectar a USB no site (o ESP pode continuar no cabo, só para a alimentação, ou numa fonte).
+2. No seletor ao lado do Conectar, **Bluetooth** → **Conectar** → escolher **Flyback ESP32** na
+   lista do navegador. Ao lado aparece `Bluetooth · Flyback ESP32 · nov/2026`.
+3. "testar" em cada canal e uma música, como pela USB. As notas saem com 300 ms de antecedência
+   (contra 100 ms pela USB), o que não atrasa nada entre os arcos.
+4. No celular Android: Chrome, o mesmo endereço, a mesma sequência. Na primeira vez o Android pede
+   a permissão de dispositivos próximos (ou de localização, nos mais antigos). iPhone não tem Web
+   Bluetooth no Safari.
+5. Desligar o Bluetooth do celular (ou sair do alcance) tocando: o ESP silencia na hora e volta a
+   anunciar; "Conectar" de novo retoma.
+6. O gerador de tom usa a mesma escolha (USB ou Bluetooth) do player.
 
 ## 8. Com os flybacks
 
@@ -175,8 +213,11 @@ mandar algo durante o teste, ela assume: o tom para quando ela mandar silêncio 
 Em 16/out a porta caiu poucos segundos depois de o gerador de tom começar, com o arco aberto sem parar;
 tocando música, não. Para saber se o ESP **reiniciou** ou se só o **USB** caiu:
 
-1. Depois da queda, abra o monitor serial e digite `?`. A resposta traz `ligado há N s` e `último
-   reinício: ...`.
+1. Depois da queda, abra `python firmware/monitor_serial.py COM5` e digite `?`. A resposta traz
+   `ligado há N s` e `último reinício: ...`. **Não use o monitor do Arduino nem o site para isso:**
+   eles puxam DTR/RTS ao abrir a porta, e nas placas com reset automático (o S3 com CH343, o ESP32
+   com CP210x) o ESP reinicia nessa hora — o tempo zera e o motivo vira `energia ligada`, seja qual
+   for a causa da queda. O `monitor_serial.py` abre sem mexer nessas linhas.
    - `ligado há` grande (não zerou): o ESP nem reiniciou — caiu só a ligação USB. É interferência no
      cabo: afaste o cabo USB do flyback, use cabo curto com ferrite, e o notebook na bateria.
    - `QUEDA DE TENSÃO (brownout)`: a alimentação do ESP afundou com o arco. Fonte do ESP separada da
@@ -196,4 +237,45 @@ use o teste pelo botão BOOT.
 
 Preencher a cada sessão de bancada (data, o que funcionou, o que não, o que mudou no código).
 
-- _(nada ainda)_
+### 25/nov/2026 — ESP32-S3 N16R8, Bluetooth e envelope
+
+Sem a placa de potência: o ESP sozinho, conferido pela serial e medindo o próprio pino.
+
+- **Placa:** ESP32-S3 (QFN56) rev v0.2, 16 MB de flash, 8 MB de PSRAM, na USB nativa (COM4) e
+  depois na do CH343 (COM5). Pacote `esp32:esp32` 3.3.12 pelo `arduino-cli`.
+- **O firmware que estava gravado não respondia pela USB nativa:** tinha sido compilado sem
+  `CDCOnBoot=cdc`, com a serial na UART0. Com a opção, responde pelas duas entradas.
+- **Envelope (nov/2026) confere na placa.** Uma versão de medição do firmware lia o GPIO 4 durante
+  18 ms (4 períodos de 220 Hz) e contava a fração em ALTO; fração medida contra a conta do
+  protocolo (d = asin(L)/π):
+
+  | nota de 2 s | 0,05 s | 0,3 s | 0,6 s | 1 s | 1,5 s | 1,9 s | depois do F |
+  |---|---|---|---|---|---|---|---|
+  | reto | 495‰ (500) | 505 (500) | 505 (500) | 505 (500) | 505 (500) | 498 (500) | 0 |
+  | corda | 391 (388) | 258 (252) | 163 (170) | 108 (106) | 61 (60) | 37 (38) | 0 |
+  | força 30% | 87 (97) | 98 (97) | 98 (97) | 87 (97) | 97 (97) | 87 (97) | 0 |
+  | percussivo | 253 (231) | 56 (55) | 34 (34) | 32 (32) | 32 (32) | 32 (32) | 0 |
+
+  As diferenças de ~10‰ são da janela de medida, que pega fração de período. Falta medir na
+  potência abaixo de que fração o arco deixa de soar.
+- **Bluetooth:** o firmware anuncia `Flyback ESP32` e responde pela USB que está anunciando. O
+  notebook da bancada não tem adaptador Bluetooth: a conexão sem fio foi testada só com o ESP
+  simulado em `tools/testar_site.py` (pedaços de 20 bytes até o MTU, uma escrita por vez, queda).
+  **Falta conectar de verdade** pelo celular ou por um PC com Bluetooth (passo 7b).
+- **Achado: abrir a porta do CH343 mexia no ESP.** O circuito de reset automático liga DTR e RTS
+  ao GPIO 0 e ao EN, e o `testar_serial.py` abria a porta do jeito padrão do pyserial, com os dois
+  ligados. Numa vez o pulso no GPIO 0 foi lido como aperto do BOOT, e o tom de teste de 440 Hz no
+  máximo ligou sozinho (com a potência ligada, o arco abriria por até 2 min se nada mandasse `X`);
+  noutra, o S3 reiniciou em modo de gravação (`boot:0x0 DOWNLOAD... waiting for download`) e não
+  respondia mais. Corrigido nos três lados: o BOOT só vale parado em BAIXO por 80 ms; o
+  `testar_serial.py` e a página (só fora da USB nativa) abrem, soltam o GPIO 0 e dão um pulso no EN,
+  e esperam o `pronto` (0,6 s no S3). Depois disso, duas rodadas seguidas com boot normal.
+- **Depois, pelo site publicado (ainda sem a correção), os flybacks pararam:** o site conectava, o
+  LED do CH343 piscava a cada nota, e nada no arco. O ESP estava parado no modo de gravação — o
+  esptool conectou no ROM sem reiniciar — depois de o Chrome abrir e fechar a porta do CH343. Um
+  pulso limpo no EN (GPIO 0 solto) o devolveu ao firmware. A página nova avisa quando o ESP não
+  responde ao `?` em 2,5 s. Enquanto ela não estiver publicada: use a entrada USB nativa da placa,
+  ou o site servido por `python tools/servir.py`.
+- **Motivo do reinício no S3:** gravar ou abrir a USB nativa aparecia como `outro`; agora é
+  `reinício pela USB nativa`. Pelo EN (o pulso do CH343) aparece `energia ligada`, que é como o
+  chip registra.
