@@ -376,6 +376,7 @@ input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radiu
           <button id="serX">Silenciar tudo</button>
           <label class="chk" id="monitorRot"><input type="checkbox" id="monitor"> ouvir no computador</label>
           <label class="chk" title="Ligado, o arco segue o envelope e a dinâmica de cada canal do mixer, pela fração aberta de cada período. Desligado, cada nota sai inteira no máximo, como no firmware antigo."><input type="checkbox" id="envArco"> envelope no arco</label>
+          <label class="chk" title="Pausa entre duas notas seguidas no mesmo arco: o arco apaga esse tempo antes da próxima, para notas repetidas ou rápidas não emendarem. Vale também no som do computador e no WAV.">respiro <select id="respiro" aria-label="Respiro entre notas"><option value="0">0</option><option value="15">15 ms</option><option value="25">25 ms</option><option value="40">40 ms</option><option value="60">60 ms</option></select></label>
         </div>
         <details class="log" id="serLogBox"><summary>Linhas enviadas</summary><pre id="serLog">nada enviado ainda</pre></details>
         <div class="linha sep">
@@ -683,6 +684,7 @@ const esp = (() => {
   return { n: modoAntigo === 'estereo' ? 2 : Math.max(1, Math.min(MAX, Math.round(+s.n) || 2)), placa,
            pinos: ok ? s.pinos.map(Number) : PLACAS[placa].padrao.slice(),
            baud: BAUDS.includes(+s.baud) ? +s.baud : 115200, monitor: s.monitor !== false, envArco: s.envArco === true,
+           respiro: [0, 15, 25, 40, 60].includes(+s.respiro) ? +s.respiro : 25,
            via: temVia(s.via) ? s.via : temVia('usb') ? 'usb' : 'ble' };
 })();
 const salvarEsp = () => store.set('esp', esp);
@@ -926,16 +928,22 @@ function curtas(segs){
     }
   }
 }
-/* Nota repetida colada na anterior: pela serial vai só o "N" da segunda, na mesma frequência, e o
-   arco não desliga — a repetição some. O dono do projeto ouviu a cavalgada de Eye of the Tiger,
-   semicolcheias de 140 ms em C3 coladas umas nas outras, virar uma nota só. No computador ela se
-   ouvia, porque cada trecho tem rampa de 6 ms no fim e 4 ms no começo; no arco, não. A de antes
-   desliga RESPIRO antes da seguinte (no máximo 40% dela, numa nota curtíssima). */
-const RESPIRO = .025;
+/* Respiro entre notas no arco. O arco não tem volume para marcar o começo de uma nota: o que a
+   separa da anterior é ele apagar um instante. Duas notas seguidas no mesmo arco com pausa menor
+   que o respiro (esp.respiro, em ms, escolhido ao lado de "envelope no arco") ganham o respiro
+   inteiro: a de antes acaba mais cedo, no máximo 40% dela numa nota curtíssima.
+   - Primeiro só a nota repetida e colada: pela serial ia só o "N" da segunda, na mesma frequência,
+     e a cavalgada de Eye of the Tiger (semicolcheias de 140 ms em C3) virava uma nota só.
+   - Em 25/nov o dono do projeto ouviu no tema do Rocky as notas "emendarem, sem dar tempo do arco
+     dissipar": o MIDI do MuseScore acaba cada nota 1 ms antes da seguinte, e a regra, que pedia
+     pausa zero, não entrava — ia "F", e 1 ms depois o "N". Agora vale para qualquer pausa menor que
+     o respiro e para nota diferente também: com o envelope desligado, o respiro é o ataque. */
 function respiro(segs){
+  const r = esp.respiro / 1000;
+  if (!r) return;
   for (let k = 0; k + 1 < segs.length; k++){
-    const s = segs[k], b = segs[k + 1];
-    if (s.n === b.n && b.start - s.end < 1e-6) s.end -= Math.min(RESPIRO, .4 * (s.end - s.start));
+    const s = segs[k], b = segs[k + 1], pausa = b.start - s.end;
+    if (pausa < r) s.end -= Math.min(r - pausa, .4 * (s.end - s.start));
   }
 }
 /* "Repartir". Os arcos com essa opção que recebem a mesma faixa dividem as notas dela como as
@@ -3031,6 +3039,8 @@ $('baud').value = String(esp.baud);
 $('baud').onchange = e => { esp.baud = +e.target.value; salvarEsp(); };
 $('monitor').checked = esp.monitor;
 $('monitor').onchange = e => { esp.monitor = e.target.checked; salvarEsp(); ligarSaida(); };
+$('respiro').value = String(esp.respiro);
+$('respiro').onchange = e => { esp.respiro = +e.target.value; salvarEsp(); if (tracks.length) reschedule(); };
 $('envArco').checked = esp.envArco;
 $('envArco').onchange = e => { esp.envArco = e.target.checked; salvarEsp(); if (playing) serialStart(position()); };
 

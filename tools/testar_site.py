@@ -416,6 +416,14 @@ def serial(nav, base):
     confere(canais and canais <= {0, 1}, f'com dois flybacks a serial continua, só nos canais 0 e 1 ({sorted(canais)})')
     pg.click('#serGo'); time.sleep(.2)
     confere(pg.evaluate('window.__serial.fechada'), 'desconectar fecha a porta')
+    # respiro: no Rocky (MuseScore) cada nota acaba 1 ms antes da seguinte, e no arco emendavam
+    pausas = "Math.min(...ch.slice(0, nCanais()).flatMap(c => c.segs.slice(1).map((s, k) => (s.start - c.segs[k].end) * 1000)))"
+    abrir(pg, base, 'temas/filmes e séries/Filmes/Rocky - Gonna Fly Now.mid')
+    p25 = pg.evaluate(pausas)
+    pg.select_option('#respiro', '0'); time.sleep(.3)
+    p0 = pg.evaluate(pausas)
+    pg.select_option('#respiro', '25'); time.sleep(.3)
+    confere(p0 < 2 and p25 >= 24.9, f'respiro: no Rocky a menor pausa entre notas vai de {p0:.1f} ms (sem respiro) a {p25:.1f} ms (25 ms)')
     # o ESP parado no modo de gravação: a porta abre, mas ninguém responde ao "?"
     pg.evaluate('window.__serial.mudo = true')
     pg.click('#serGo'); time.sleep(2.8)

@@ -30,6 +30,9 @@ Feito no computador da bancada, com o ESP32-S3 no USB. Resultados em `docs/banca
   sozinho e a deixar o S3 em modo de gravação.
 - **Envelope medido na placa** (no pino, sem potência): bate com a conta, ver a tabela em
   Resultados.
+- **Respiro entre notas para todas as notas próximas**, escolhido ao lado de "envelope no arco"
+  (0 a 60 ms, 25 por padrão). No tema do Rocky as notas repetidas emendavam no arco: o MIDI acaba
+  cada nota 1 ms antes da seguinte, e o respiro só valia com pausa zero.
 - **"Envelope no arco" virou opção**, ao lado de "ouvir no computador", desligada por padrão:
   desligada, a nota sai inteira no máximo, como antes do envelope.
 - **A serial voltou a cair com o arco tocando**, agora pela USB nativa: o mais provável é a

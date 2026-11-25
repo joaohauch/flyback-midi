@@ -438,7 +438,7 @@ não tem os acentos em Si bemol e Lá bemol. `large` e `medium`, orientação 1 
 feixe: todos escrevem C3, G3 e C4 e mais nada. É limite do modelo nesse trecho; a versão de fã em
 `bandas/Survivor` tem o riff.
 
-**Nota repetida colada precisa de respiro no arco.** Pela serial, trecho colado no anterior vai só
+**Respiro entre notas no arco.** O arco não tem volume para marcar o começo de uma nota: o que a separa da anterior é ele apagar um instante. Duas notas seguidas no mesmo arco com pausa menor que o respiro ganham o respiro inteiro (`respiro()`; a de antes acaba mais cedo, no máximo 40% dela). Primeiro valia só para nota repetida e colada — pela serial ia só o "N" da segunda, e a cavalgada de Eye of the Tiger virava uma nota só. Em 25/nov o dono do projeto ouviu no tema do Rocky as notas emendarem: o MIDI do MuseScore acaba cada nota 1 ms antes da seguinte, a regra pedia pausa zero e não entrava. Agora vale para qualquer pausa menor que o respiro e para nota diferente também, e a duração se escolhe ao lado de "envelope no arco" (0, 15, 25, 40 ou 60 ms; `esp.respiro`, 25 por padrão). Vale também no som do computador e no WAV, que saem dos mesmos `segs`.
 com o "N" dele; na mesma frequência, o arco não desliga e a repetição some — a cavalgada vira uma nota
 só. No computador ela se ouvia pela rampa de 10 ms de cada trecho. `respiro()` desliga a de antes 25
 ms antes da seguinte (no máximo 40% dela).
