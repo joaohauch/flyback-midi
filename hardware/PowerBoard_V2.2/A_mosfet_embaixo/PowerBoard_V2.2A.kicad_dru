@@ -1,0 +1,4 @@
+(version 1)
+(rule "24V longe do GND"
+	(constraint clearance (min 1.5mm))
+	(condition "(A.NetName == '+24V' && B.NetName == 'GND') || (A.NetName == 'GND' && B.NetName == '+24V')"))

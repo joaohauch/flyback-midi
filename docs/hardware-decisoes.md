@@ -598,7 +598,7 @@ A entrada da V3.6 é 6N136 + BC547 no RESET do U13, com lógica direta: GPIO alt
 
 A placa de potência que vai ser feita em quatro unidades, numa fresadora CNC (isolação pelo FlatCAM). É a PowerBoard V2.1 do Altium (totem pole) com as decisões da seção 9.4, no desenho da PowerBoard V3 do EasyEDA: o mesmo tamanho, 85,2 × 39,5 mm, e as peças de potência nas mesmas posições.
 
-O projeto do KiCad 10 fica em `FlybachSchems/PowerBoard_V2.2/`, fora deste repositório, com uma subpasta por versão (10.2). Ele é gerado por `gerar_v22.py` e `pcb_v22.py`, com ERC e DRC sem erros. O README de lá traz a montagem, a lista de peças e o passo a passo do FlatCAM. O Gerber da V3 do EasyEDA está em `FlybachSchems/PowerBoardV3_EasyEDA/`.
+O projeto do KiCad 10 fica em [`hardware/PowerBoard_V2.2/`](../hardware/PowerBoard_V2.2/), com uma subpasta por versão (10.2). Ele é gerado por `gerar_v22.py` e `pcb_v22.py`, com ERC e DRC sem erros. O README de lá traz a montagem, a lista de peças e o passo a passo do FlatCAM. O Gerber da V3 do EasyEDA está em `FlybachSchems/PowerBoardV3_EasyEDA/`.
 
 ### 10.1 A placa
 

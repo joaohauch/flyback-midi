@@ -15,3 +15,8 @@ musicas/unsorted/
 
 # estado do lote de transcricao (tools/lote.py)
 .lote.json
+
+# KiCad: estado local da janela, backups e cache
+*.kicad_prl
+*-backups/
+fp-info-cache

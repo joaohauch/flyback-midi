@@ -1,0 +1,4 @@
+(fp_lib_table
+	(version 7)
+	(lib (name "FBMD") (type "KiCad") (uri "${KIPRJMOD}/../FBMD.pretty") (options "") (descr "Footprints da PowerBoard V2.2 para fresadora"))
+)

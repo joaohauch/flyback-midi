@@ -1,0 +1,13 @@
+(footprint "Furo_M3_CNC"
+	(version 20260206)
+	(generator "gerar_v22")
+	(layer "F.Cu")
+	(descr "Furo de fixação M3 (3,2 mm) para standoff de nylon")
+	(property "Reference" "H**" (at 0 -3.6 0) (layer "F.SilkS") (hide yes) (effects (font (size 1 1) (thickness 0.15))))
+	(property "Value" "Furo_M3_CNC" (at 0 3.6 0) (layer "F.Fab") (hide yes) (effects (font (size 1 1) (thickness 0.15))))
+	(attr board_only exclude_from_pos_files exclude_from_bom)
+	(fp_circle (center 0 0) (end 2.75 0) (stroke (width 0.12) (type solid)) (fill no) (layer "F.SilkS"))
+	(fp_circle (center 0 0) (end 3.0 0) (stroke (width 0.05) (type solid)) (fill no) (layer "F.CrtYd"))
+	(pad "" np_thru_hole circle (at 0 0) (size 3.2 3.2) (drill 3.2) (layers "*.Cu" "*.Mask") (clearance 0.6))
+	(embedded_fonts no)
+)

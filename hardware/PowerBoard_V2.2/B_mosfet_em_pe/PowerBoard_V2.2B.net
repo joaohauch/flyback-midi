@@ -1,0 +1,1864 @@
+(export
+	(version "E")
+	(design
+		(source "C:\\Users\\joao~\\Projects\\Pessoais\\midi-flyback\\repo\\hardware\\PowerBoard_V2.2\\B_mosfet_em_pe\\PowerBoard_V2.2B.kicad_sch")
+		(date "2026-11-24T22:59:04")
+		(tool "Eeschema 10.0.6")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title "FBMD PowerBoard V2.2B · MOSFET em pé")
+				(company "FBMD · flyback musical")
+				(rev "2.2B")
+				(date "2026-11-23")
+				(source "PowerBoard_V2.2B.kicad_sch")
+				(comment
+					(number "1")
+					(value "V2.1 (totem pole) + correções da V3.6, no desenho da PowerBoard V3; face simples, fresada")
+				)
+				(comment
+					(number "2")
+					(value "Totem pole em 12 V, IRFP264N, 300 nF no dreno (3 x 100 nF MKP), MUR860, sem TVS")
+				)
+				(comment
+					(number "3")
+					(value "IRFP264N em pé na face de cima, aba virada para a borda de baixo")
+				)
+				(comment
+					(number "4")
+					(value "PCB: PowerBoard_V2.2B.kicad_pcb, gerada por gerar_v22.py")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components
+		(comp
+			(ref "C1")
+			(value "470µ 35V")
+			(footprint "FBMD:CP_Radial_D12.5_P5.00_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:CP_Radial_D12.5_P5.00_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C_Polarized")
+				(description "Polarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "CP_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "03c5d7d6-e62d-447e-8d07-011b7086cfb5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C2")
+			(value "470µ 35V")
+			(footprint "FBMD:CP_Radial_D12.5_P5.00_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:CP_Radial_D12.5_P5.00_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C_Polarized")
+				(description "Polarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "CP_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "70d5bdbe-7735-481a-8ae8-a3162a6ce28f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C3")
+			(value "470µ 35V")
+			(footprint "FBMD:CP_Radial_D12.5_P5.00_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:CP_Radial_D12.5_P5.00_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C_Polarized")
+				(description "Polarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "CP_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b97661ba-847c-485b-9de9-da70b0107a61")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C4")
+			(value "470µ 35V")
+			(footprint "FBMD:CP_Radial_D12.5_P5.00_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:CP_Radial_D12.5_P5.00_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C_Polarized")
+				(description "Polarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "CP_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "20fa1847-857c-4df5-9772-9a888fc5404f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C6")
+			(value "47µ 25V")
+			(footprint "FBMD:CP_Radial_D6.3_P2.50_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:CP_Radial_D6.3_P2.50_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C_Polarized")
+				(description "Polarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "CP_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "34151ec6-dea0-4280-833a-77db9c8e7ff7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C7")
+			(value "100n")
+			(footprint "FBMD:C_Disc_P5.00_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:C_Disc_P5.00_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "7d8e2b2d-96ca-4e15-bced-dcef3ed03884")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C8")
+			(value "100n")
+			(footprint "FBMD:C_MKP_W6_P10_P15_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:C_MKP_W6_P10_P15_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "cc2c0330-c220-4e0c-b24e-54fdbc3f189b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C9")
+			(value "100n")
+			(footprint "FBMD:C_MKP_W6_P10_P15_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:C_MKP_W6_P10_P15_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "44027a6b-b686-485e-bd1d-b45d3ac472b9")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C10")
+			(value "100n")
+			(footprint "FBMD:C_MKP_W6_P10_P15_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:C_MKP_W6_P10_P15_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2fe234b0-7253-4a52-bf25-5b7d94cdd43a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D1")
+			(value "1N4148")
+			(footprint "FBMD:D_DO-35_P7.62_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:D_DO-35_P7.62_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Diode")
+				(part "1N4148")
+				(description "100V 0.15A standard switching diode, DO-35")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "D*DO?35*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1c5d35be-5658-4d56-9249-387a9ae08984")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D2")
+			(value "MUR860")
+			(footprint "FBMD:TO-220-2_Vertical_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:TO-220-2_Vertical_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "D")
+				(description "Diode")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "TO-???* *_Diode_* *SingleDiode* D_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5aaeb8ac-9253-4b45-a93b-b3490bf210c4")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J1")
+			(value "XT60 24 V")
+			(footprint "FBMD:XT60-M_Vertical_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:XT60-M_Vertical_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector_Generic")
+				(part "Conn_01x02")
+				(description "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f40600ad-e90e-48fd-b918-ec1b898c3fb2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J3")
+			(value "primário")
+			(footprint "FBMD:Phoenix_MCV_1x02_P5.08_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:Phoenix_MCV_1x02_P5.08_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector_Generic")
+				(part "Conn_01x02")
+				(description "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a456c317-1a84-4e14-94d9-fdabedfca18a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "JP1")
+			(value "fio do gate")
+			(footprint "FBMD:Jumper_Fio_16.0mm")
+			(fields
+				(field
+					(name "Footprint") "FBMD:Jumper_Fio_16.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Jumper")
+				(part "Jumper_2_Bridged")
+				(description "Jumper, 2-pole, closed/bridged")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "Jumper SPST")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Jumper* TestPoint*2Pads* TestPoint*Bridge*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c4370dac-d253-43b9-83a7-9e07c52aad02")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "P2")
+			(value "12V GND SIN")
+			(footprint "FBMD:Molex_KK-254_1x03_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:Molex_KK-254_1x03_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector_Generic")
+				(part "Conn_01x03")
+				(description "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "55f0fa89-8df5-4bdc-879b-e8e71c78592c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "Q1")
+			(value "BC337")
+			(footprint "FBMD:TO-92_Inline_Wide_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:TO-92_Inline_Wide_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Transistor_BJT")
+				(part "BC337")
+				(description "0.8A Ic, 45V Vce, NPN Transistor, TO-92")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "NPN Transistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "TO?92*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "617e1f7c-b2b3-4744-9815-8ed4950f40ad")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "Q2")
+			(value "BC327")
+			(footprint "FBMD:TO-92_Inline_Wide_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:TO-92_Inline_Wide_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Transistor_BJT")
+				(part "BC327")
+				(description "0.8A Ic, 45V Vce, PNP Transistor, TO-92")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "PNP Transistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "TO?92*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "df128bc3-c7b9-4536-9a18-3066ac2788e7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "Q3")
+			(value "IRFP264N")
+			(footprint "FBMD:TO-247-3_Vertical_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:TO-247-3_Vertical_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Transistor_FET")
+				(part "Q_NMOS_GDS")
+				(description "N-MOSFET transistor, gate/drain/source")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "transistor NMOS N-MOS N-MOSFET")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "06278c5f-a6ea-401e-ad8a-2571cf2b47c3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R1")
+			(value "10Ω")
+			(footprint "FBMD:R_Axial_P10.16_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:R_Axial_P10.16_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "739fd3cb-d5c6-4d5f-8b29-d2f0254ef59e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R2")
+			(value "10k")
+			(footprint "FBMD:R_Axial_P10.16_CNC")
+			(fields
+				(field
+					(name "Footprint") "FBMD:R_Axial_P10.16_CNC")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "PowerBoard_V2.2B")
+			)
+			(property
+				(name "Sheetfile")
+				(value "PowerBoard_V2.2B.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9339013d-a4d2-40c0-99e8-da6cf07271cb")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+	)
+	(groups)
+	(variants)
+	(libparts
+		(libpart
+			(lib "Connector_Generic")
+			(part "Conn_01x02")
+			(description "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			(footprints
+				(fp "Connector*:*_1x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_01x02")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector_Generic")
+			(part "Conn_01x03")
+			(description "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			(footprints
+				(fp "Connector*:*_1x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_01x03")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "Pin_3")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "C")
+			(description "Unpolarized capacitor")
+			(footprints
+				(fp "C_*")
+			)
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "C_Polarized")
+			(description "Polarized capacitor")
+			(footprints
+				(fp "CP_*")
+			)
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C_Polarized")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Polarized capacitor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "D")
+			(description "Diode")
+			(footprints
+				(fp "TO-???*")
+				(fp "*_Diode_*")
+				(fp "*SingleDiode*")
+				(fp "D_*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "D")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Diode")
+				(field
+					(name "Sim.Device") "D")
+				(field
+					(name "Sim.Pins") "1=K 2=A")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "K")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "A")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "R")
+			(description "Resistor")
+			(footprints
+				(fp "R_*")
+			)
+			(fields
+				(field
+					(name "Reference") "R")
+				(field
+					(name "Value") "R")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Diode")
+			(part "1N4148")
+			(description "100V 0.15A standard switching diode, DO-35")
+			(docs "https://assets.nexperia.com/documents/data-sheet/1N4148_1N4448.pdf")
+			(footprints
+				(fp "D*DO?35*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "1N4148")
+				(field
+					(name "Footprint") "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal")
+				(field
+					(name "Datasheet") "https://assets.nexperia.com/documents/data-sheet/1N4148_1N4448.pdf")
+				(field
+					(name "Description") "100V 0.15A standard switching diode, DO-35")
+				(field
+					(name "Sim.Device") "D")
+				(field
+					(name "Sim.Pins") "1=K 2=A")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "K")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "A")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Jumper")
+			(part "Jumper_2_Bridged")
+			(description "Jumper, 2-pole, closed/bridged")
+			(footprints
+				(fp "Jumper*")
+				(fp "TestPoint*2Pads*")
+				(fp "TestPoint*Bridge*")
+			)
+			(fields
+				(field
+					(name "Reference") "JP")
+				(field
+					(name "Value") "Jumper_2_Bridged")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Jumper, 2-pole, closed/bridged")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "A")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "B")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Transistor_BJT")
+			(part "BC327")
+			(description "0.8A Ic, 45V Vce, PNP Transistor, TO-92")
+			(docs "http://www.onsemi.com/pub_link/Collateral/BC327-D.PDF")
+			(footprints
+				(fp "TO?92*")
+			)
+			(fields
+				(field
+					(name "Reference") "Q")
+				(field
+					(name "Value") "BC327")
+				(field
+					(name "Footprint") "Package_TO_SOT_THT:TO-92_Inline")
+				(field
+					(name "Datasheet") "http://www.onsemi.com/pub_link/Collateral/BC327-D.PDF")
+				(field
+					(name "Description") "0.8A Ic, 45V Vce, PNP Transistor, TO-92")
+				(field
+					(name "Sim.Device") "PNP")
+				(field
+					(name "Sim.Pins") "1=C 2=B 3=E")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "C")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "B")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "E")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Transistor_BJT")
+			(part "BC337")
+			(description "0.8A Ic, 45V Vce, NPN Transistor, TO-92")
+			(docs "https://diotec.com/tl_files/diotec/files/pdf/datasheets/bc337.pdf")
+			(footprints
+				(fp "TO?92*")
+			)
+			(fields
+				(field
+					(name "Reference") "Q")
+				(field
+					(name "Value") "BC337")
+				(field
+					(name "Footprint") "Package_TO_SOT_THT:TO-92_Inline")
+				(field
+					(name "Datasheet") "https://diotec.com/tl_files/diotec/files/pdf/datasheets/bc337.pdf")
+				(field
+					(name "Description") "0.8A Ic, 45V Vce, NPN Transistor, TO-92")
+				(field
+					(name "Sim.Device") "NPN")
+				(field
+					(name "Sim.Pins") "1=C 2=B 3=E")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "C")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "B")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "E")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Transistor_FET")
+			(part "Q_NMOS_GDS")
+			(description "N-MOSFET transistor, gate/drain/source")
+			(fields
+				(field
+					(name "Reference") "Q")
+				(field
+					(name "Value") "Q_NMOS_GDS")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "N-MOSFET transistor, gate/drain/source")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "G")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "D")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "S")
+					(type "passive")
+				)
+			)
+		)
+	)
+	(libraries
+		(library
+			(logical "Connector_Generic")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")
+		)
+		(library
+			(logical "Device")
+			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
+		)
+		(library
+			(logical "Diode")
+			(uri "${KICAD10_SYMBOL_DIR}/Diode.kicad_sym")
+		)
+		(library
+			(logical "Jumper")
+			(uri "${KICAD10_SYMBOL_DIR}/Jumper.kicad_sym")
+		)
+		(library
+			(logical "Transistor_BJT")
+			(uri "${KICAD10_SYMBOL_DIR}/Transistor_BJT.kicad_sym")
+		)
+		(library
+			(logical "Transistor_FET")
+			(uri "${KICAD10_SYMBOL_DIR}/Transistor_FET.kicad_sym")
+		)
+	)
+	(nets
+		(net
+			(code "1")
+			(name "+12V")
+			(class "Default")
+			(node
+				(ref "C6")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C7")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "P2")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q1")
+				(pin "1")
+				(pinfunction "C_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "2")
+			(name "+24V")
+			(class "Potencia")
+			(node
+				(ref "C1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C2")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C4")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J3")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "3")
+			(name "/DRENO")
+			(class "HV")
+			(node
+				(ref "C10")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C8")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C9")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "D2")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J3")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q3")
+				(pin "2")
+				(pinfunction "D_2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "4")
+			(name "/DRV")
+			(class "Default")
+			(node
+				(ref "D1")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q1")
+				(pin "3")
+				(pinfunction "E_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q2")
+				(pin "3")
+				(pinfunction "E_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "R1")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "5")
+			(name "/GATE")
+			(class "Default")
+			(node
+				(ref "D1")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "JP1")
+				(pin "1")
+				(pinfunction "A_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "JP1")
+				(pin "2")
+				(pinfunction "B_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q3")
+				(pin "1")
+				(pinfunction "G_1")
+				(pintype "input")
+			)
+			(node
+				(ref "R1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R2")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "6")
+			(name "/GATE_DRV")
+			(class "Default")
+			(node
+				(ref "P2")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q1")
+				(pin "2")
+				(pinfunction "B_2")
+				(pintype "input")
+			)
+			(node
+				(ref "Q2")
+				(pin "2")
+				(pinfunction "B_2")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "7")
+			(name "GND")
+			(class "Potencia")
+			(node
+				(ref "C1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C10")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C2")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C4")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C6")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C7")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C8")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C9")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "D2")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "P2")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q2")
+				(pin "1")
+				(pinfunction "C_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q3")
+				(pin "3")
+				(pinfunction "S_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "R2")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+	)
+)
