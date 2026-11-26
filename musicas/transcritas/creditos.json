@@ -1237,5 +1237,16 @@
   "vocal": "sim · faixa \"voice\"",
   "aproveitamento": 46,
   "aproveitamento6": 64
+ },
+ "Red Sun (1992) - Red Sun in the Sky.mid": {
+  "autor": "Red Sun (1992)",
+  "artista": "Red Sun (1992)",
+  "licenca": "obra protegida — uso educacional sem fins lucrativos",
+  "credito": "canção revolucionária chinesa \"天上太阳红彤彤\", na versão do álbum Red Sun (1992); o YouTube credita a gravação a \"Mao Ze Dong\", que é o tema das canções, não o intérprete",
+  "transcricao": "MuScriptor large (Kyutai/Mirelo) rodado localmente, transcrição automática do áudio, sem transcritor humano; instrumentos detectados pelo PANNs: voice, electric_bass, acoustic_guitar",
+  "fonte": "https://www.youtube.com/watch?v=xGxj2iHAtzE",
+  "vocal": "sim · faixa \"voice\"",
+  "aproveitamento": 47,
+  "aproveitamento6": 65
  }
 }
