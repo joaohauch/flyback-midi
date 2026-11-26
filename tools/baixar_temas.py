@@ -98,6 +98,19 @@ DUR_MAX = 6.5 * 60
 # O Hino Nacional e Brasileirinho saíram daqui em 25/nov/2026: estão em classicos e em bandas.
 TEMAS = [
     # --- jogos
+    # Five Nights at Freddy's (pedido do dono do projeto, 26/nov/2026): a música mais famosa é a da
+    # The Living Tombstone, canção de fã que virou o tema da série; mais as outras dela e a caixinha
+    # de música do Freddy no jogo, que é a Marcha do Toreador, da Carmen de Bizet
+    ("jogos/Scott Cawthon/Five Nights at Freddy's", "Five Nights at Freddy's - The Living Tombstone", 'The Living Tombstone',
+     [P(r"^five nights at freddy'?s - the living tombstone")]),
+    ("jogos/Scott Cawthon/Five Nights at Freddy's", "FNaF 2 - It's Been So Long (The Living Tombstone)", 'The Living Tombstone',
+     [P(r"^it'?s been so long")]),
+    ("jogos/Scott Cawthon/Five Nights at Freddy's", 'FNaF 4 - I Got No Time (The Living Tombstone)', 'The Living Tombstone',
+     [P(r'fnaf 4 i got no time')]),
+    ("jogos/Scott Cawthon/Five Nights at Freddy's", 'FNaF - Stay Calm (Griffinilla)', 'Griffinilla',
+     [P(r'^stay calm \(fnaf')]),
+    ("jogos/Scott Cawthon/Five Nights at Freddy's", "Five Nights at Freddy's - caixinha do Freddy (Marcha do Toreador)", 'Georges Bizet',
+     [P(r'^toreador march$')]),
     ('jogos/Toby Fox/Undertale', 'Undertale - Megalovania', 'Toby Fox',
      [('vgmusic', 'windows', '^Undertale$', '^Megalovania'), ('pdmx', 'megalovania')]),
     ('jogos/Toby Fox/Undertale', 'Undertale - Hopes and Dreams', 'Toby Fox',
